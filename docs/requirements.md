@@ -8,7 +8,7 @@ Built for the Mantle Turing Test Hackathon 2026, targeting the **AI × RWA track
 
 > **Evidence-first rule.** A skeptical judge scores **artifacts, not aspirations.** Every "MUST" here is a gate on a shippable artifact (deployed address, txhash, a real PSA cert tokenized end-to-end, live URL, passing test). A requirement is **not met** until its artifact is recorded in the **Submission Evidence** table at the end of this doc. Prose earns nothing on the execution-weighted dimensions; only the artifact does.
 
-> **Current repo gap (must close before judging).** The repo is a static Next.js demo: hardcoded data in `src/lib/packproof-data.ts`, a deterministic `pickReward(openCount % 4)` in `src/components/PackProofApp.tsx`, a literal **"Connect wallet"** button, and `contracts/PackProof.sol` is a **skeleton** with no tests, no deploy script, no toolchain config, no recorded addresses, block-derived reveal entropy, no commitment check, and **no verify view function**. There is **zero** PSA-authentication / external-NFT / AI-pricing / compliance / custody / Minds-Bazaar code. The requirements below define what MUST exist; the Submission Evidence table tracks closure of each gap.
+> **Status (most code-side gaps now closed).** The original skeleton has been replaced: a 4-contract Foundry set (ExternalCardNFT with cert-uniqueness + two-tier custody + listing gate, PackManager with checked commit-reveal + public `verifyReveal`, RewardNFT, AttestationLog) is **deployed live on Mantle Sepolia (5003)**; the PSA AI pipeline (OCR→PSA cross-check→image-match→valuation) runs behind pluggable mock-default adapters; the frontend is rewired (no "Connect wallet"; photo-first flow); the relayer gives a wallet-free happy path. Toolchain is green (forge 24/24, typecheck, vitest 20/20, next build). **Remaining gaps are human handoffs**: real PSA/vision creds to swap mock→real, a public live URL, Bazaar publish of the verify Skill, and the demo video. The Submission Evidence table tracks each.
 
 ---
 
@@ -162,16 +162,17 @@ Mantle is the **settlement/execution layer**, not just a deploy target:
 
 | Artifact | Status | Evidence at submission |
 | --- | --- | --- |
-| Contracts deployed on Mantle | Skeleton only; not deployed | Explorer address + txhashes for mint/transfer/pack/verify |
-| PSA AI pipeline (OCR→cross-check→image-match→valuation) | Not implemented | A real cert tokenized end-to-end; authentication report + on-chain hash |
-| External-NFT registry + cert uniqueness | Not implemented | Source + a mint blocked on duplicate cert |
-| Custody/redemption model | Not implemented | Documented model + a working redeem (burn/lock) |
-| `verifyReveal` + recompute | Not implemented | Source + a live reveal verified |
-| Compliance screening (AI-assisted) | Not implemented | KYC/AML/jurisdiction + counterfeit flag in the flow |
-| Sponsored-signing (no wallet step) | Not implemented; wallet button present | Relayer + wallet-free happy-path recording |
-| Live platform URL + deployed address | Not deployed | Public URL + address in README |
-| Bazaar verify Skill | Not published | Public Skill name + ID, publish-form screenshot |
-| Demo video | Not recorded | Real asset live on-chain, end-to-end |
+| Contracts deployed on Mantle | ✅ LIVE on Mantle Sepolia (5003) | 4 addresses + deploy txhashes in README; mint tx `0x7ca8…1e2d`, pack purchase `0xd026…ac8a`, reveal `0x7491…58a0` |
+| PSA AI pipeline (OCR→cross-check→image-match→valuation) | ✅ Code done (pluggable, mock default) | HUMAN: tokenize a real cert with real adapters (creds) for the report + on-chain hash artifact |
+| External-NFT registry + cert uniqueness | ✅ Done + live | `ExternalCardNFT` deployed; `test_revertWhen_duplicateCert` green; real mint tokenId 1, `isListingEligible=true` |
+| Custody/redemption model | ✅ Done (two-tier, on-chain gated) | Listing gated to custodial; redeem burn/lock + double-redeem revert tests green; honest attested/simulated (no physical vault) |
+| `verifyReveal` + recompute | ✅ Done + verified on-chain | `verifyReveal(1) → (true,true,4,4)` live on 5003; tamper-detect test green |
+| Compliance screening (AI-assisted) | ✅ Code done | KYC/AML/jurisdiction + counterfeit-flag branch (mock `FAKE` cert drives block); HUMAN: real-data pass |
+| Sponsored-signing (no wallet step) | ✅ Done (relayer) | "Connect wallet" removed; relayer key set in `.env.local` (real txs). HUMAN: wallet-free happy-path recording |
+| Toolchain green | ✅ | `forge test` 24/24, `npm run typecheck` 0 errors, `npm test` 20/20, `next build` ok (paste output here) |
+| Live platform URL | ⏳ HUMAN | Provision public deploy (e.g. Vercel), record URL |
+| Bazaar verify Skill | ⏳ HUMAN (scaffold ready) | Fix ABI/reportHash drift, publish, record name + ID + screenshot |
+| Demo video | ⏳ HUMAN | ≥2min, real asset live on-chain, end-to-end |
 
 Until an artifact exists, its execution-weighted dimension does not score; state this plainly rather than asserting completion.
 
