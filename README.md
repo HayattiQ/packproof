@@ -151,7 +151,7 @@ All steps run wallet-free; the relayer signs server-side. With mock adapters thi
 - `verifyReveal(1)` (view) → `(revealed=true, matches=true, recomputedRank=4, storedRank=4)` — on-chain fairness check passes.
 
 - **Network:** Mantle Sepolia testnet, chainId **5003** (Mantle mainnet is chainId 5000, documented for production).
-- **Live platform URL:** _TODO (provision a public deploy, e.g. Vercel, and record it here)._
+- **Live platform URL:** https://packproof.yourbright.workers.dev — deployed on **Cloudflare Workers** via `@opennextjs/cloudflare` (YourBright account, production). Public vars (addresses/RPC) are in `wrangler.jsonc`; `RELAYER_PRIVATE_KEY` is a Worker **secret** (set via `wrangler secret put`, never committed). Deploy with `npm run deploy`. Verified live: `/`, `/api/packs`, and `POST /api/verify {packTokenId:1}` → `revealVerified:true` (reads the live Mantle contract).
 - **Verify Skill (Minds Bazaar):** name `PackProof Verify` / id `packproof-verify` are **placeholders** — replace with the real published name + ID after publishing.
 
 ---

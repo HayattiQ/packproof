@@ -9,3 +9,8 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+
+// Integrates the Next.js dev server with the OpenNext Cloudflare adapter
+// (enables local access to Worker bindings). No-op in production builds.
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
+initOpenNextCloudflareForDev();

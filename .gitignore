@@ -20,3 +20,6 @@ contracts/broadcast
 
 # Harness session state
 .claude
+.open-next
+.dev.vars
+cloudflare-env.d.ts

@@ -170,7 +170,7 @@ Mantle is the **settlement/execution layer**, not just a deploy target:
 | Compliance screening (AI-assisted) | ✅ Code done | KYC/AML/jurisdiction + counterfeit-flag branch (mock `FAKE` cert drives block); HUMAN: real-data pass |
 | Sponsored-signing (no wallet step) | ✅ Done (relayer) | "Connect wallet" removed; relayer key set in `.env.local` (real txs). HUMAN: wallet-free happy-path recording |
 | Toolchain green | ✅ | `forge test` 24/24, `npm run typecheck` 0 errors, `npm test` 20/20, `next build` ok (paste output here) |
-| Live platform URL | ⏳ HUMAN | Provision public deploy (e.g. Vercel), record URL |
+| Live platform URL | ✅ LIVE | https://packproof.yourbright.workers.dev (Cloudflare Workers / OpenNext, YourBright prod). `POST /api/verify {packTokenId:1}` → `revealVerified:true` against the live Mantle contract |
 | Bazaar verify Skill | ⏳ HUMAN (scaffold ready) | Fix ABI/reportHash drift, publish, record name + ID + screenshot |
 | Demo video | ⏳ HUMAN | ≥2min, real asset live on-chain, end-to-end |
 
