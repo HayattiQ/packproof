@@ -61,6 +61,8 @@ export type RegisterResponse = {
 // --- /api/verify ------------------------------------------------------------
 export const verifyRequestSchema = z
   .object({
+    /** single free-form lookup (tokenId or cert) used by the unified search box. */
+    query: z.string().trim().optional(),
     certNumber: z.string().trim().optional(),
     tokenId: z.string().trim().optional(),
     packTokenId: z.string().trim().optional(),
@@ -68,18 +70,39 @@ export const verifyRequestSchema = z
     report: z.unknown().optional(),
     expectedReportHash: z.string().optional(),
   })
-  .refine((v) => v.certNumber || v.tokenId || v.packTokenId, {
-    message: "Provide certNumber, tokenId, or packTokenId.",
+  .refine((v) => v.query || v.certNumber || v.tokenId || v.packTokenId, {
+    message: "Provide a query, certNumber, tokenId, or packTokenId.",
   });
 export type VerifyRequest = z.infer<typeof verifyRequestSchema>;
 
+export type VerifyCheck = {
+  name: string;
+  /** pass=true ok, false bad, null skipped. `kind` overrides the visual tone. */
+  pass: boolean | null;
+  detail: string;
+  /** visual tone for the new design: ok (jade) / info (gold) / bad (danger). */
+  kind?: "ok" | "info" | "bad";
+};
+
+export type ProvenanceEvent = {
+  event: string;
+  detail: string;
+  /** optional timeline metadata for the design's provenance chain. */
+  when?: string;
+  who?: string;
+};
+
 export type VerifyResponse = {
   ok: boolean;
-  checks: Array<{ name: string; pass: boolean | null; detail: string }>;
+  /** "found" once a subject resolves; "notfound" drives the empty-state branch. */
+  status?: "found" | "notfound";
+  /** resolved subject summary for the result header. */
+  subject?: { tokenId: string; cert: string; grade: number; gradeLabel: string } | null;
+  checks: VerifyCheck[];
   psaMatch: boolean | null;
   reportHashVerified: boolean | null;
   revealVerified: boolean | null;
-  provenance: Array<{ event: string; detail: string }>;
+  provenance: ProvenanceEvent[];
 };
 
 // --- /api/packs -------------------------------------------------------------
@@ -94,6 +117,17 @@ export type PackView = {
   probabilityHash: string;
   status: string;
   odds: Array<{ rank: string; label: string; odds: string; estimatedValue: string }>;
+  /** --- design display fields (pack picker) --- */
+  /** short marquee label, e.g. "PSA 10 Box". */
+  label: string;
+  /** the two PSA tiers shown as grade seals, e.g. ["10", "9"]. */
+  tiers: string[];
+  /** sale price in collector points (the no-wallet currency). */
+  pricePoints: number;
+  /** headline odds copy, e.g. "PSA 10 rate 4.2%". */
+  topRate: string;
+  /** sold-through fill for the progress bar (0–100). */
+  fillPercent: number;
 };
 
 export type PacksResponse = { packs: PackView[] };
@@ -118,6 +152,19 @@ export type OpenPackResponse = {
   reveal: { txHash: string; simulated: boolean };
   /** the commitment + salt so the result can be independently re-verified. */
   commitment: { probabilityHash: string; userSalt: string };
+  /**
+   * The PackManager.verifyReveal() row data, surfaced progressively in the
+   * design's "Proof of this open" panel. recomputedRank === storedRank when
+   * the keccak256(serverSeed, inventoryRoot) commitment check passes.
+   */
+  verify: {
+    commitment: string;
+    serverSeed: string;
+    storedRank: number;
+    recomputedRank: number;
+    matches: boolean;
+    txHash: string;
+  };
 };
 
 // --- /api/marketplace/list --------------------------------------------------
@@ -135,6 +182,17 @@ export type Listing = {
   priceMnt: string;
   custodyTier: CustodyTier;
   reportHash: string;
+  /** --- design display fields (marketplace grid + buy modal) --- */
+  /** PSA grade label, e.g. "GEM MT" / "MINT" / "NM-MT". */
+  gradeLabel?: string;
+  /** set / series, e.g. "Base Set". */
+  setName?: string;
+  /** display cert string, e.g. "8472 1130". */
+  cert?: string;
+  /** USD list price for the design's pricing. */
+  priceUsd?: number;
+  /** placeholder card art URL (Pokémon official-artwork for this private mock). */
+  imageUrl?: string;
 };
 
 export type ListResponse =

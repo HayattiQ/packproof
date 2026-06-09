@@ -1,72 +1,88 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import { RegisterCard } from "@/components/RegisterCard";
 import { Marketplace } from "@/components/Marketplace";
 import { PackOpen } from "@/components/PackOpen";
 import { VerifyPanel } from "@/components/VerifyPanel";
 
-type Tab = "register" | "marketplace" | "packs" | "verify";
+type Tab = "register" | "marketplace" | "open" | "verify";
 
-const TABS: Array<{ id: Tab; label: string }> = [
-  { id: "register", label: "Register a card" },
-  { id: "marketplace", label: "Marketplace" },
-  { id: "packs", label: "Open a pack" },
-  { id: "verify", label: "Verify" },
+const TABS: Array<{ k: Tab; l: string }> = [
+  { k: "register", l: "Register a card" },
+  { k: "marketplace", l: "Marketplace" },
+  { k: "open", l: "Open a pack" },
+  { k: "verify", l: "Verify" },
 ];
 
+function readHash(): Tab {
+  if (typeof window === "undefined") return "register";
+  const h = (window.location.hash || "").replace("#", "");
+  return TABS.some((t) => t.k === h) ? (h as Tab) : "register";
+}
+
 /**
- * Tab shell for PackProof. The "Connect wallet" button is intentionally GONE:
- * the consumer happy path is wallet-free (sponsored signing via the relayer).
- * Each tab calls the API; nothing is hardcoded demo state anymore.
+ * PackProof app shell — obsidian + grade-gold + holo design. Sticky nav with
+ * deep-linkable tabs, a collector-points balance, and the no-wallet chip. Each
+ * tab reads/writes the live API; signing is sponsored by the relayer.
  */
 export function PackProofApp() {
   const [tab, setTab] = useState<Tab>("register");
+  const [points, setPoints] = useState(5000);
+
+  // Sync the active tab with the URL hash so tabs are deep-linkable.
+  useEffect(() => {
+    setTab(readHash());
+    const onHash = () => setTab(readHash());
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
+
+  const go = useCallback((k: Tab) => {
+    if (typeof window !== "undefined") window.location.hash = k;
+    setTab(k);
+  }, []);
+
+  const spend = useCallback((n: number) => setPoints((p) => Math.max(0, p - n)), []);
 
   return (
-    <main className="shell">
-      <nav className="topbar" aria-label="Main navigation">
-        <div className="brand-mark" aria-hidden="true">
-          PP
+    <div className="app">
+      <header className="appnav">
+        <div className="wrap appnav-in">
+          <Link className="brand" href="/">
+            <span className="mark">P</span>PackProof
+          </Link>
+          <nav className="apptabs">
+            {TABS.map((t) => (
+              <button
+                key={t.k}
+                type="button"
+                className={"apptab" + (tab === t.k ? " active" : "")}
+                onClick={() => go(t.k)}
+              >
+                {t.l}
+              </button>
+            ))}
+          </nav>
+          <div className="right">
+            <span className="pts">
+              {points.toLocaleString()} <small>pt</small>
+            </span>
+            <span className="chip">
+              <span className="dot" />
+              Sponsored signing · no wallet
+            </span>
+          </div>
         </div>
-        <div>
-          <p className="eyebrow">Mantle Turing Test Hackathon 2026 · AI × RWA</p>
-          <h1>PackProof</h1>
-        </div>
-        <span className="no-wallet-pill">No wallet needed</span>
-      </nav>
+      </header>
 
-      <section className="hero hero-compact">
-        <div className="hero-copy">
-          <p className="eyebrow">AI-authenticated RWA tokenization on Mantle</p>
-          <h2>Snap your PSA card. AI authenticates, prices, and mints it on-chain.</h2>
-          <p className="lede">
-            PackProof reads the slab, cross-checks PSA&apos;s registry, scores counterfeit risk, and prices
-            from comparables — then mints a redeemable external NFT whose authentication report is hashed
-            on-chain for anyone to verify.
-          </p>
-        </div>
-      </section>
-
-      <nav className="tab-bar" aria-label="Sections">
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            type="button"
-            className={`tab ${tab === t.id ? "tab-active" : ""}`}
-            onClick={() => setTab(t.id)}
-          >
-            {t.label}
-          </button>
-        ))}
-      </nav>
-
-      <div className="tab-panel">
+      <main className="screen">
         {tab === "register" && <RegisterCard />}
         {tab === "marketplace" && <Marketplace />}
-        {tab === "packs" && <PackOpen />}
+        {tab === "open" && <PackOpen points={points} onSpend={spend} />}
         {tab === "verify" && <VerifyPanel />}
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }
