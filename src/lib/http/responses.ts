@@ -46,6 +46,7 @@ export type RegisterResponse = {
   message: string;
   certNumber: string;
   cardLabel: string | null;
+  imageUrl: string | null;
   grade: number | null;
   custodyTier: CustodyTier;
   valuation: { lowUsd: number; highUsd: number; estimateUsd: number } | null;
@@ -116,7 +117,7 @@ export type PackView = {
   inventoryRoot: string;
   probabilityHash: string;
   status: string;
-  odds: Array<{ rank: string; label: string; odds: string; estimatedValue: string }>;
+  odds: Array<{ rank: string; label: string; odds: string; estimatedValue: string; imageUrl?: string }>;
   /** --- design display fields (pack picker) --- */
   /** short marquee label, e.g. "PSA 10 Box". */
   label: string;
@@ -147,6 +148,7 @@ export type OpenPackResponse = {
   rank: string;
   rewardLabel: string;
   estimatedValue: string;
+  imageUrl: string;
   rewardTokenId: string;
   purchase: { txHash: string; simulated: boolean } | null;
   reveal: { txHash: string; simulated: boolean };

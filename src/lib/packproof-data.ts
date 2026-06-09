@@ -16,13 +16,14 @@ export type Reward = {
   rank: "S" | "A" | "B" | "C";
   odds: string;
   estimatedValue: string;
+  imageUrl: string;
 };
 
 export const REWARD_TABLE: Reward[] = [
-  { id: "reward-s", label: "Vaulted grail-card redemption NFT", rank: "S", odds: "1.0%", estimatedValue: "$420 - $580" },
-  { id: "reward-a", label: "High-grade collector redemption NFT", rank: "A", odds: "6.0%", estimatedValue: "$80 - $160" },
-  { id: "reward-b", label: "Rare foil-card redemption NFT", rank: "B", odds: "23.0%", estimatedValue: "$20 - $60" },
-  { id: "reward-c", label: "Collector points reward", rank: "C", odds: "70.0%", estimatedValue: "$3 - $12" },
+  { id: "reward-s", label: "Vaulted grail-card redemption NFT", rank: "S", odds: "1.0%", estimatedValue: "$420 - $580", imageUrl: ART(6) },
+  { id: "reward-a", label: "High-grade collector redemption NFT", rank: "A", odds: "6.0%", estimatedValue: "$80 - $160", imageUrl: ART(25) },
+  { id: "reward-b", label: "Rare foil-card redemption NFT", rank: "B", odds: "23.0%", estimatedValue: "$20 - $60", imageUrl: ART(150) },
+  { id: "reward-c", label: "Collector points reward", rank: "C", odds: "70.0%", estimatedValue: "$3 - $12", imageUrl: ART(151) },
 ];
 
 const ODDS = REWARD_TABLE.map((r) => ({
@@ -30,6 +31,7 @@ const ODDS = REWARD_TABLE.map((r) => ({
   label: r.label,
   odds: r.odds,
   estimatedValue: r.estimatedValue,
+  imageUrl: r.imageUrl,
 }));
 
 // --- Provably-fair packs (matches the design's pack picker) ----------------
@@ -96,8 +98,22 @@ export function getPack(id: string): PackView | undefined {
 // --- Seed marketplace listings ----------------------------------------------
 // Custodial, listing-eligible cards. Placeholder card art uses the public
 // PokéAPI official-artwork sprites (this is a private mock, per the brief).
-const ART = (id: number) =>
-  `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+function ART(id: number): string {
+  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+}
+
+export function cardArtForLabel(label: string | null | undefined): string {
+  const normalized = (label ?? "").toLowerCase();
+  if (normalized.includes("charizard")) return ART(6);
+  if (normalized.includes("blastoise")) return ART(9);
+  if (normalized.includes("venusaur")) return ART(3);
+  if (normalized.includes("pikachu")) return ART(25);
+  if (normalized.includes("mewtwo")) return ART(150);
+  if (normalized.includes("mew")) return ART(151);
+  if (normalized.includes("gengar")) return ART(94);
+  if (normalized.includes("snorlax")) return ART(143);
+  return ART(25);
+}
 
 function rh(seed: string): string {
   // Stable, readable pseudo report-hash for the seed listings.

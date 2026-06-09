@@ -326,6 +326,10 @@ export function RegisterCard() {
             <div className="mint-result">
               <div className="mint-card">
                 <div className="win">
+                  {result.imageUrl && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={result.imageUrl} alt={result.cardLabel ?? "Minted Pokemon card"} />
+                  )}
                   <div className="shine" />
                 </div>
                 <div className="meta">

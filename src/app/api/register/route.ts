@@ -8,7 +8,7 @@ import { getPsaAdapter } from "@/lib/psa";
 import { reportHash, jsonHash } from "@/lib/agents/report";
 import type { AuthenticationReport } from "@/lib/agents/types";
 import { recordAgentLog, mintExternalCard } from "@/lib/chain/relayer";
-import { addListing } from "@/lib/packproof-data";
+import { addListing, cardArtForLabel } from "@/lib/packproof-data";
 
 export const runtime = "nodejs";
 
@@ -41,6 +41,7 @@ export async function POST(req: Request) {
 
   const cardLabel = auth.psaRecord?.cardLabel ?? auth.ocr.cardLabel;
   const grade = auth.psaRecord?.grade ?? auth.ocr.grade;
+  const imageUrl = cardArtForLabel(cardLabel);
 
   // 2) Pricing agent (only meaningful with an identity; still returns a range).
   const pricing = await runPricing({
@@ -118,6 +119,7 @@ export async function POST(req: Request) {
           priceMnt: estimateToMnt(pricing.estimateUsd),
           custodyTier,
           reportHash: hash,
+          imageUrl,
         });
       }
     }
@@ -172,6 +174,7 @@ export async function POST(req: Request) {
     message,
     certNumber: auth.certNumber,
     cardLabel,
+    imageUrl,
     grade,
     custodyTier,
     valuation: { lowUsd: pricing.lowUsd, highUsd: pricing.highUsd, estimateUsd: pricing.estimateUsd },

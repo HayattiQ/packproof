@@ -73,6 +73,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
     rank,
     rewardLabel: reward.label,
     estimatedValue: reward.estimatedValue,
+    imageUrl: reward.imageUrl,
     rewardTokenId: reveal.returnValue ?? "0",
     purchase,
     reveal: { txHash: reveal.txHash, simulated: reveal.simulated },
