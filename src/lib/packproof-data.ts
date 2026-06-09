@@ -14,6 +14,26 @@ export type AgentLog = {
   hash: string;
 };
 
+export type Capability = {
+  name: string;
+  publicId: string;
+  activationMessage: string;
+  guidePath: string;
+  supportedPrompts: string[];
+};
+
+export type SubmissionEvidence = {
+  label: string;
+  value: string;
+  status: "ready" | "placeholder";
+};
+
+export type RwaProof = {
+  label: string;
+  detail: string;
+  evidence: string;
+};
+
 export type Pack = {
   id: string;
   name: string;
@@ -26,6 +46,9 @@ export type Pack = {
   probabilityHash: string;
   rewards: Reward[];
   agents: AgentLog[];
+  capability: Capability;
+  submissionEvidence: SubmissionEvidence[];
+  rwaProofs: RwaProof[];
 };
 
 export const featuredPack: Pack = {
@@ -89,6 +112,71 @@ export const featuredPack: Pack = {
       score: 83,
       summary: "Reveal distribution is healthy; bot limits should be enabled before launch.",
       hash: "0x1edc...aa09",
+    },
+  ],
+  capability: {
+    name: "PackProof Fairness Auditor",
+    publicId: "packproof-fairness-auditor.demo",
+    activationMessage: "Use PackProof to audit a collectible mystery pack before I buy or open it.",
+    guidePath: "/agent-guide",
+    supportedPrompts: [
+      "Audit pack mantle-genesis-001 before I buy it.",
+      "Explain the inventory root, odds hash, and AI health score.",
+      "Create a judge-friendly proof summary for PackProof.",
+    ],
+  },
+  submissionEvidence: [
+    {
+      label: "Live app URL",
+      value: "Deployment URL to be added after hosting",
+      status: "placeholder",
+    },
+    {
+      label: "Repository URL",
+      value: "https://github.com/HayattiQ/packproof",
+      status: "ready",
+    },
+    {
+      label: "Mantle contract",
+      value: "Contract address to be added after testnet deployment",
+      status: "placeholder",
+    },
+    {
+      label: "Minds Bazaar",
+      value: "Capability URL/public ID to be added after publish",
+      status: "placeholder",
+    },
+    {
+      label: "/agent-guide",
+      value: "/agent-guide",
+      status: "ready",
+    },
+    {
+      label: "Demo video",
+      value: "Video URL to be added after recording",
+      status: "placeholder",
+    },
+  ],
+  rwaProofs: [
+    {
+      label: "Inventory commitment",
+      detail: "Physical collectible inventory is committed before sale with a Merkle-style root.",
+      evidence: "inventoryRoot",
+    },
+    {
+      label: "Redemption-right NFT",
+      detail: "Opened rewards map to NFTs that represent a claim on a physical collectible or digital reward.",
+      evidence: "Reward struct",
+    },
+    {
+      label: "AI audit log",
+      detail: "Valuation, pack balance, and fairness outputs are hashed and logged to Mantle.",
+      evidence: "AgentLogRecorded",
+    },
+    {
+      label: "Compliance disclosure",
+      detail: "The demo avoids official card IP and flags random-sale, custody, and fulfillment review before production.",
+      evidence: "README legal note",
     },
   ],
 };

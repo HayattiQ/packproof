@@ -56,6 +56,9 @@ export function PackProofApp() {
             <a className="secondary-button" href="#verification">
               View proof
             </a>
+            <a className="secondary-button" href={featuredPack.capability.guidePath}>
+              /agent-guide
+            </a>
           </div>
         </div>
 
@@ -103,6 +106,31 @@ export function PackProofApp() {
               <p>Open a sample pack to preview the reward NFT flow.</p>
             </>
           )}
+        </article>
+      </section>
+
+      <section className="section" aria-label="PackProof Fairness Auditor capability">
+        <div className="section-title">
+          <p className="eyebrow">Minds Bazaar</p>
+          <h3>{featuredPack.capability.name}</h3>
+        </div>
+        <article className="capability-panel">
+          <div>
+            <span>Capability ID</span>
+            <strong>{featuredPack.capability.publicId}</strong>
+          </div>
+          <div>
+            <span>Activation message</span>
+            <p>{featuredPack.capability.activationMessage}</p>
+          </div>
+          <div>
+            <span>Supported prompts</span>
+            <ul>
+              {featuredPack.capability.supportedPrompts.map((prompt) => (
+                <li key={prompt}>{prompt}</li>
+              ))}
+            </ul>
+          </div>
         </article>
       </section>
 
@@ -158,6 +186,38 @@ export function PackProofApp() {
               </div>
               <p>{agent.summary}</p>
               <code>{agent.hash}</code>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="section-title">
+          <p className="eyebrow">Mantle RWA</p>
+          <h3>Physical collectible RWA proof</h3>
+        </div>
+        <div className="rwa-grid">
+          {featuredPack.rwaProofs.map((proof) => (
+            <article className="proof-card" key={proof.label}>
+              <span>{proof.evidence}</span>
+              <strong>{proof.label}</strong>
+              <p>{proof.detail}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="section-title">
+          <p className="eyebrow">Submission evidence</p>
+          <h3>Judge-ready links and IDs</h3>
+        </div>
+        <div className="evidence-list">
+          {featuredPack.submissionEvidence.map((item) => (
+            <article className="evidence-row" key={item.label}>
+              <strong>{item.label}</strong>
+              <span>{item.value}</span>
+              <em className={item.status}>{item.status}</em>
             </article>
           ))}
         </div>

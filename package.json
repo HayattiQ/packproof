@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "tsc --noEmit",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "verify:submission": "node scripts/verify-submission-evidence.mjs"
   },
   "dependencies": {
     "next": "^15.3.3",

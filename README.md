@@ -22,15 +22,17 @@ PackProof uses Mantle as the verification layer:
 
 Mantle Turing Test Hackathon 2026:
 
-- Consumer & Viral DApps
-- Agentic Wallets & Economy
-- AI Alpha & Data
+- Primary: Animoca / Consumer & Viral DApps
+- Secondary: Mantle RWA
+- Supporting narrative: Agentic Wallets & Economy and AI Alpha & Data
 
 ## MVP Scope
 
 - Next.js product demo UI
 - Pack listing, pack detail, reveal simulation, verification panel
 - AI-agent log dashboard
+- Minds Bazaar capability concept: PackProof Fairness Auditor
+- Public `/agent-guide` for another user's Mind to equip and operate the capability
 - Solidity contract skeleton for pack sale, reveal, reward NFT, and agent logs
 - Proposal and requirements documents
 
@@ -55,7 +57,41 @@ bun dev
 2. Review the live pack card, odds, inventory commitment, and AI health score.
 3. Click `Open pack` to reveal a sample reward.
 4. Check the verification panel and AI-agent log.
-5. Use the README, docs, and contract skeleton as DoraHacks submission evidence.
+5. Open `/agent-guide` and review the PackProof Fairness Auditor capability.
+6. Demo a different user's Mind asking the capability to audit `mantle-genesis-001`.
+7. Use the README, docs, and contract skeleton as DoraHacks submission evidence.
+
+## Animoca Submission Strategy
+
+PackProof is positioned as a consumer mystery-pack DApp plus a Minds Bazaar capability.
+
+- Capability name: PackProof Fairness Auditor
+- Capability ID: `packproof-fairness-auditor.demo`
+- Activation message: `Use PackProof to audit a collectible mystery pack before I buy or open it.`
+- Guide: `/agent-guide` and `docs/agent-guide.md`
+
+The web app delivers the consumer pack-opening experience. The capability lets another user's Mind inspect odds, inventory commitments, AI health, reveal history, and redemption status without needing builder context.
+
+## Mantle RWA Positioning
+
+PackProof treats physical collectible inventory as a verifiable off-chain asset set.
+
+- Sealed pack NFTs represent unopened claims.
+- Reward NFTs represent physical-card redemption rights or digital rewards.
+- Inventory and probability commitments are published before sale.
+- AI-agent logs are hashed and committed to Mantle for auditability.
+- Production use requires legal review for trademark, copyright, random-sale rules, consumer protection, KYC/AML where applicable, custody, fulfillment, and redemption disputes.
+
+## Submission evidence
+
+| Item | Status |
+| --- | --- |
+| Live app URL | Add after deployment |
+| Repository URL | `https://github.com/HayattiQ/packproof` |
+| Mantle contract address | Add after testnet deployment |
+| Minds Bazaar capability URL/public ID | Add after publish |
+| `/agent-guide` | Included |
+| Demo video | Add after recording |
 
 ## Repository Structure
 

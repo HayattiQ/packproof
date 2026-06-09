@@ -141,6 +141,31 @@ h3 {
   align-self: center;
 }
 
+.guide-shell {
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.back-link {
+  margin-bottom: 28px;
+}
+
+.guide-hero {
+  padding: 48px 0 10px;
+}
+
+.guide-hero h1 {
+  font-size: clamp(42px, 7vw, 78px);
+  line-height: 0.98;
+  margin-bottom: 18px;
+}
+
+.guide-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, 1fr);
+}
+
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
@@ -223,7 +248,10 @@ h3 {
 .panel,
 .reward-row,
 .agent-card,
-.proof-grid > div {
+.proof-grid > div,
+.capability-panel,
+.proof-card,
+.evidence-row {
   background: var(--panel);
   border: 1px solid var(--line);
 }
@@ -352,7 +380,9 @@ h3 {
   padding: 18px;
 }
 
-.proof-grid span {
+.proof-grid span,
+.capability-panel span,
+.proof-card span {
   color: var(--muted);
   font-size: 14px;
   font-weight: 700;
@@ -365,6 +395,80 @@ code {
 
 .agent-list {
   grid-template-columns: repeat(3, 1fr);
+}
+
+.capability-panel {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(180px, 0.8fr) minmax(240px, 1fr) minmax(280px, 1.2fr);
+  padding: 18px;
+}
+
+.capability-panel > div {
+  display: grid;
+  gap: 8px;
+}
+
+.capability-panel p,
+.capability-panel ul,
+.proof-card p {
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.capability-panel ul {
+  padding-left: 18px;
+}
+
+.rwa-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.proof-card {
+  display: grid;
+  gap: 10px;
+  min-height: 180px;
+  padding: 18px;
+}
+
+.evidence-list {
+  display: grid;
+  gap: 10px;
+}
+
+.evidence-row {
+  align-items: center;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(160px, 0.6fr) minmax(0, 1fr) 104px;
+  min-height: 64px;
+  padding: 12px 16px;
+}
+
+.evidence-row span {
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.evidence-row em {
+  color: white;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 900;
+  justify-self: end;
+  padding: 6px 10px;
+  text-transform: uppercase;
+}
+
+.ready {
+  background: var(--teal-dark);
+}
+
+.placeholder {
+  background: var(--danger);
 }
 
 .agent-card {
@@ -408,7 +512,8 @@ code {
   .hero,
   .grid,
   .proof-grid,
-  .agent-list {
+  .agent-list,
+  .guide-grid {
     grid-template-columns: 1fr;
   }
 
@@ -419,5 +524,15 @@ code {
 
   .reward-row {
     grid-template-columns: 44px 1fr;
+  }
+
+  .capability-panel,
+  .rwa-grid,
+  .evidence-row {
+    grid-template-columns: 1fr;
+  }
+
+  .evidence-row em {
+    justify-self: start;
   }
 }
