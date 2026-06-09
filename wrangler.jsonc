@@ -1,0 +1,34 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "packproof",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2024-12-30",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "packproof"
+    }
+  ],
+  // Public runtime vars (contract addresses, RPC, chain). Read by the server at
+  // runtime (src/lib/chain/*). NOT secret. The relayer's RELAYER_PRIVATE_KEY is a
+  // Worker SECRET set out-of-band via `wrangler secret put` (never committed).
+  "vars": {
+    "NEXT_PUBLIC_CHAIN_NAME": "Mantle Sepolia",
+    "NEXT_PUBLIC_MANTLE_CHAIN_ID": "5003",
+    "NEXT_PUBLIC_EXTERNAL_CARD_NFT_ADDRESS": "0x4e7A6785D4169238F1B0B26250CDd977960649E9",
+    "NEXT_PUBLIC_ATTESTATION_LOG_ADDRESS": "0xA472CF3F003FC67d8cCe5Ef283a79395e0786D67",
+    "NEXT_PUBLIC_PACK_MANAGER_ADDRESS": "0x2057b54EDB1c3EF4aE022d2E0Afc1233b705D2Ac",
+    "NEXT_PUBLIC_REWARD_NFT_ADDRESS": "0x8DAFE9E1fEBDf7C334329d52EFec19c22e901768",
+    "NEXT_PUBLIC_TREASURY_ADDRESS": "0x5e57b7cED8f5696Dc76B29b61F9225A1FB7256d3",
+    "NEXT_PUBLIC_MANTLE_EXPLORER_URL": "https://sepolia.mantlescan.xyz",
+    "MANTLE_RPC_URL": "https://rpc.sepolia.mantle.xyz",
+    "PACKPROOF_ADAPTERS": "mock",
+    "COMPLIANCE_ENHANCED_KYC_USD_THRESHOLD": "5000",
+    "COMPLIANCE_RESTRICTED_JURISDICTIONS": "IR,KP,SY,CU"
+  }
+}

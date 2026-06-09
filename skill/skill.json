@@ -1,0 +1,58 @@
+{
+  "$schema": "https://mindsbazaar.example/schemas/skill.v1.json",
+  "_comment": "PLACEHOLDER MANIFEST - a human finishes this before publishing to the Minds Bazaar. Fill the four PLACEHOLDER_* fields, confirm chainId/contract address, then submit the publish form. See agent-guide.md for behaviour.",
+
+  "publicName": "PLACEHOLDER_PUBLIC_NAME (e.g. \"PackProof Verifier\")",
+  "publicId": "PLACEHOLDER_PUBLIC_ID (assigned by the Minds Bazaar on publish, e.g. \"skill_xxxxxxxxxxxx\")",
+  "version": "0.1.0-scaffold",
+  "summary": "Independently verify a PackProof NFT or a PSA cert number: PSA-registry match, authentication-report-hash check, provably-fair verifyReveal, and the on-chain provenance chain.",
+
+  "activationMessage": "PLACEHOLDER_ACTIVATION_MESSAGE (shown to the user when the Mind equips this Skill, e.g. \"I can independently verify any PackProof card or PSA cert. Send me a PackProof token id or a PSA cert number and I'll check authenticity, fairness, and provenance against the Mantle chain and PSA's registry.\")",
+
+  "agentGuide": "./agent-guide.md",
+  "handler": "./handler.ts",
+  "handlerEntry": "verify",
+
+  "intent": "verify-collectible-authenticity",
+  "tags": ["rwa", "psa", "graded-cards", "provenance", "provably-fair", "mantle", "verification"],
+
+  "inputs": {
+    "tokenId": {
+      "type": "string",
+      "required": false,
+      "description": "A PackProof external-NFT or reward-NFT token id. One of tokenId or certNumber is required."
+    },
+    "certNumber": {
+      "type": "string",
+      "required": false,
+      "description": "A PSA certification number. Resolved to a PackProof token if one exists. One of tokenId or certNumber is required."
+    }
+  },
+
+  "output": {
+    "type": "object",
+    "description": "A VerifyResult: see the VerifyResult type in handler.ts. Carries an overall verdict plus per-check booleans (psaMatch, reportHashMatch, revealMatch) and the provenance chain."
+  },
+
+  "network": {
+    "_comment": "PLACEHOLDER - set to the deployed PackProof network. Mantle mainnet chainId 5000, Mantle Sepolia testnet chainId 5003.",
+    "chainId": 5003,
+    "rpcUrlEnv": "PACKPROOF_RPC_URL",
+    "contractAddressEnv": "PACKPROOF_CONTRACT_ADDRESS",
+    "contractAddress": "PLACEHOLDER_CONTRACT_ADDRESS (0x... once deployed to Mantle)",
+    "psaRegistryEnv": "PSA_REGISTRY_BASE_URL"
+  },
+
+  "permissions": {
+    "network": ["read-only on-chain RPC", "read-only PSA cert-verification registry"],
+    "writes": "none — this Skill never sends a transaction or mutates state"
+  },
+
+  "publishChecklist": [
+    "Replace PLACEHOLDER_PUBLIC_NAME, PLACEHOLDER_PUBLIC_ID, PLACEHOLDER_ACTIVATION_MESSAGE, PLACEHOLDER_CONTRACT_ADDRESS.",
+    "Set network.chainId to the deployed network.",
+    "Swap handler.ts createReader() from the mock reader to the live viem reader (USE_MOCK=false) and confirm the ABIs match the deployed contract.",
+    "Confirm PSA_REGISTRY_BASE_URL points at the attribution-compliant registry endpoint.",
+    "Smoke-test against a real tokenized cert, then submit the Bazaar publish form and capture name + ID."
+  ]
+}

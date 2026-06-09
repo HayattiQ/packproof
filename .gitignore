@@ -11,3 +11,15 @@ artifacts
 broadcast
 *.log
 *.tsbuildinfo
+
+# Foundry artifacts (contracts/ domain)
+contracts/lib
+contracts/out
+contracts/cache
+contracts/broadcast
+
+# Harness session state
+.claude
+.open-next
+.dev.vars
+cloudflare-env.d.ts
