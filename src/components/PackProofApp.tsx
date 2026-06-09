@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { type MouseEvent, useMemo, useState } from "react";
 import { featuredPack, type Reward } from "@/lib/packproof-data";
 
 const rankOrder: Reward["rank"][] = ["S", "A", "B", "C"];
@@ -19,10 +19,15 @@ export function PackProofApp() {
     return Math.round((sold / featuredPack.total) * 100);
   }, []);
 
-  function handleOpenPack() {
-    const nextCount = openCount + 1;
-    setOpenCount(nextCount);
-    setReward(pickReward(nextCount));
+  function handleOpenPack(event: MouseEvent<HTMLButtonElement>) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    setOpenCount((currentCount) => {
+      const nextCount = currentCount + 1;
+      setReward(pickReward(nextCount));
+      return nextCount;
+    });
   }
 
   return (
@@ -51,7 +56,7 @@ export function PackProofApp() {
           </p>
           <div className="hero-actions">
             <button className="primary-button" type="button" onClick={handleOpenPack}>
-              Open pack
+              Mint & reveal
             </button>
             <a className="secondary-button" href="#verification">
               View proof
@@ -92,15 +97,19 @@ export function PackProofApp() {
           <p className="eyebrow">Latest reveal</p>
           {reward ? (
             <>
-              <div className={`rank rank-${reward.rank.toLowerCase()}`}>{reward.rank}</div>
+              <div className="revealed-card">
+                <img src={reward.imageUrl} alt={`${reward.label} reward card image`} />
+                <span className={`rank rank-${reward.rank.toLowerCase()}`}>{reward.rank}</span>
+              </div>
               <h3>{reward.label}</h3>
               <p>{reward.estimatedValue}</p>
+              <small className="mint-status">Reward NFT minted / Redemption right issued</small>
             </>
           ) : (
             <>
               <div className="rank">?</div>
-              <h3>Ready to reveal</h3>
-              <p>Open a sample pack to preview the reward NFT flow.</p>
+              <h3>Ready to mint</h3>
+              <p>Mint a sample pack to reveal the reward NFT flow.</p>
             </>
           )}
         </article>
@@ -114,6 +123,7 @@ export function PackProofApp() {
         <div className="reward-list">
           {featuredPack.rewards.map((item) => (
             <article className="reward-row" key={item.id}>
+              <img className="reward-thumb" src={item.imageUrl} alt={`${item.label} prize preview`} />
               <span className={`rank-chip rank-${item.rank.toLowerCase()}`}>{item.rank}</span>
               <strong>{item.label}</strong>
               <span>{item.odds}</span>

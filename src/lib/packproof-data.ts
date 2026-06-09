@@ -4,6 +4,7 @@ export type Reward = {
   rank: "S" | "A" | "B" | "C";
   odds: string;
   estimatedValue: string;
+  imageUrl: string;
 };
 
 export type AgentLog = {
@@ -45,6 +46,7 @@ export const featuredPack: Pack = {
       rank: "S",
       odds: "1.0%",
       estimatedValue: "$420 - $580",
+      imageUrl: "https://cdn.dopa-game.jp/dopa_gacha/pack/image/d2de8713-4d0a-40b2-b474-ae7be3f3cc6d.webp",
     },
     {
       id: "reward-a",
@@ -52,6 +54,7 @@ export const featuredPack: Pack = {
       rank: "A",
       odds: "6.0%",
       estimatedValue: "$80 - $160",
+      imageUrl: "https://cdn.dopa-game.jp/dopa_gacha/pack/image/d2de8713-4d0a-40b2-b474-ae7be3f3cc6d.webp",
     },
     {
       id: "reward-b",
@@ -59,6 +62,7 @@ export const featuredPack: Pack = {
       rank: "B",
       odds: "23.0%",
       estimatedValue: "$20 - $60",
+      imageUrl: "https://cdn.dopa-game.jp/dopa_gacha/pack/image/d2de8713-4d0a-40b2-b474-ae7be3f3cc6d.webp",
     },
     {
       id: "reward-c",
@@ -66,6 +70,7 @@ export const featuredPack: Pack = {
       rank: "C",
       odds: "70.0%",
       estimatedValue: "$3 - $12",
+      imageUrl: "https://cdn.dopa-game.jp/dopa_gacha/pack/image/d2de8713-4d0a-40b2-b474-ae7be3f3cc6d.webp",
     },
   ],
   agents: [
