@@ -31,6 +31,7 @@ export function PackOpen({ points, onSpend }: { points: number; onSpend: (n: num
   const [picked, setPicked] = useState<PackView | null>(null);
   const [phase, setPhase] = useState<Phase>("pick");
   const [rows, setRows] = useState<Row[] | null>(null);
+  const [reveal, setReveal] = useState<OpenPackResponse | null>(null);
   const [verified, setVerified] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const burstRef = useRef<HTMLDivElement>(null);
@@ -55,6 +56,7 @@ export function PackOpen({ points, onSpend }: { points: number; onSpend: (n: num
     setPicked(p);
     setPhase("sealed");
     setRows(null);
+    setReveal(null);
     setVerified(false);
     setError(null);
   }
@@ -84,6 +86,7 @@ export function PackOpen({ points, onSpend }: { points: number; onSpend: (n: num
     }
 
     await sleep(600);
+    setReveal(json);
     setPhase("revealed");
     setTimeout(() => spawnSparks(burstRef.current), 60);
     runVerify(json);
@@ -198,10 +201,14 @@ export function PackOpen({ points, onSpend }: { points: number; onSpend: (n: num
                       <GradeSeal g={topTier} sub="GEM" size="sm" />
                     </div>
                     <div className="win-window">
+                      {reveal?.imageUrl && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={reveal.imageUrl} alt={`${reveal.rewardLabel} reward card`} />
+                      )}
                       <div className="shine" />
                     </div>
                     <div className="win-foot">
-                      <span>RANK {rows ? rows[2].v : "—"} · TOP TIER</span>
+                      <span>RANK {reveal?.rank ?? "—"} · {reveal?.rewardLabel ?? "TOP TIER"}</span>
                       <span style={{ color: "var(--jade)" }}>✓ revealed</span>
                     </div>
                     <button
