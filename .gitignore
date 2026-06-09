@@ -10,3 +10,4 @@ cache
 artifacts
 broadcast
 *.log
+*.tsbuildinfo
