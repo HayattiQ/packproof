@@ -18,12 +18,6 @@ type Row = { k: string; v: string; cls: "" | "ok" | "bad"; show: boolean };
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-async function readJson<T>(res: Response): Promise<T | null> {
-  const text = await res.text();
-  if (!text.trim()) return null;
-  return JSON.parse(text) as T;
-}
-
 const PENDING_ROWS: Array<{ k: string; v: string }> = [
   { k: "commitment", v: "—" },
   { k: "serverSeed", v: "— revealed on open —" },
@@ -47,8 +41,7 @@ export function PackOpen({ points, onSpend }: { points: number; onSpend: (n: num
     (async () => {
       try {
         const res = await fetch("/api/packs");
-        const json = await readJson<PacksResponse>(res);
-        if (!res.ok || !json) throw new Error(`Failed to load packs (${res.status}).`);
+        const json = (await res.json()) as PacksResponse;
         if (active) setPacks(json.packs);
       } catch (e) {
         if (active) setError(e instanceof Error ? e.message : "Failed to load packs.");
@@ -80,9 +73,7 @@ export function PackOpen({ points, onSpend }: { points: number; onSpend: (n: num
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ userSalt: `salt-${Math.random().toString(36).slice(2)}` }),
       });
-      json =
-        (await readJson<OpenPackResponse | { ok: false; error: string }>(res)) ??
-        { ok: false, error: `Open failed (${res.status}).` };
+      json = (await res.json()) as OpenPackResponse | { ok: false; error: string };
     } catch (e) {
       setError(e instanceof Error ? e.message : "Open failed.");
       setPhase("sealed");
