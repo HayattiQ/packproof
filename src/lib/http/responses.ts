@@ -45,6 +45,8 @@ export type RegisterResponse = {
   verdict: "approved" | "rejected" | "manual_review";
   message: string;
   certNumber: string;
+  /** PSA official cert-verification page for the resolved cert. */
+  psaCertUrl: string | null;
   cardLabel: string | null;
   imageUrl: string | null;
   grade: number | null;
