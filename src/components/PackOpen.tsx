@@ -26,7 +26,7 @@ const PENDING_ROWS: Array<{ k: string; v: string }> = [
   { k: "tx", v: "—" },
 ];
 
-export function PackOpen({ points, onSpend }: { points: number; onSpend: (n: number) => void }) {
+export function PackOpen() {
   const [packs, setPacks] = useState<PackView[]>([]);
   const [picked, setPicked] = useState<PackView | null>(null);
   const [phase, setPhase] = useState<Phase>("pick");
@@ -64,7 +64,6 @@ export function PackOpen({ points, onSpend }: { points: number; onSpend: (n: num
   async function open() {
     if (!picked) return;
     setPhase("opening");
-    onSpend(picked.pricePoints);
 
     let json: OpenPackResponse | { ok: false; error: string };
     try {
@@ -154,8 +153,9 @@ export function PackOpen({ points, onSpend }: { points: number; onSpend: (n: num
             {packs.map((p) => (
               <div className="pp" key={p.id} onClick={() => choose(p)}>
                 <div className="pp-art">
+                  <img className="pack-image" src={p.imageUrl} alt={`${p.label} pack artwork`} />
                   <span className="lab">{p.label}</span>
-                  <span style={{ position: "absolute", left: 14, top: 14, display: "flex", gap: 6 }}>
+                  <span className="tier">
                     {p.tiers.map((g) => (
                       <GradeSeal key={g} g={g} sub="PSA" size="sm" />
                     ))}
@@ -163,8 +163,8 @@ export function PackOpen({ points, onSpend }: { points: number; onSpend: (n: num
                 </div>
                 <div className="pp-b">
                   <span className="price">
-                    {p.pricePoints.toLocaleString()}
-                    <small> pt</small>
+                    {p.priceMnt}
+                    <small> MNT</small>
                   </span>
                   <span style={{ fontSize: 12, color: "var(--jade)" }}>✦ fair</span>
                 </div>
@@ -224,6 +224,7 @@ export function PackOpen({ points, onSpend }: { points: number; onSpend: (n: num
                     className={"sealed" + (phase === "opening" ? " opening" : "")}
                     onClick={() => phase === "sealed" && open()}
                   >
+                    <img className="sealed-image" src={picked.imageUrl} alt={`${picked.label} pack artwork`} />
                     <div className="seal-holo" />
                     <div className="seal-mark">
                       {picked.label}
@@ -268,7 +269,7 @@ export function PackOpen({ points, onSpend }: { points: number; onSpend: (n: num
                 </div>
                 {error && <p style={{ color: "var(--danger)", fontWeight: 700, marginTop: 12 }}>{error}</p>}
                 <p style={{ fontSize: 11.5, color: "var(--ink-faint)", marginTop: 12 }}>
-                  Balance: {points.toLocaleString()} pt
+                  Sponsored signing handles the transaction.
                 </p>
               </div>
             </div>

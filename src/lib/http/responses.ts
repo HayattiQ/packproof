@@ -121,10 +121,10 @@ export type PackView = {
   /** --- design display fields (pack picker) --- */
   /** short marquee label, e.g. "PSA 10 Box". */
   label: string;
+  /** pack artwork shown in the pack picker. */
+  imageUrl: string;
   /** the two PSA tiers shown as grade seals, e.g. ["10", "9"]. */
   tiers: string[];
-  /** sale price in collector points (the no-wallet currency). */
-  pricePoints: number;
   /** headline odds copy, e.g. "PSA 10 rate 4.2%". */
   topRate: string;
   /** sold-through fill for the progress bar (0–100). */
