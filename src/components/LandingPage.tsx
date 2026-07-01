@@ -276,12 +276,8 @@ export function LandingPage() {
                   <GradeSeal g="10" sub="GEM MT" />
                 </div>
                 <div className="slab-window">
+                  <img className="hero-card-art" src="/kairiki-charizard.avif" alt="かいりきリザードン" />
                   <div className="shine" />
-                  <div className="placeholder">
-                    CARD ARTWORK
-                    <br />
-                    PLACEHOLDER
-                  </div>
                 </div>
                 <div className="slab-foot">
                   <span className="cert">CERT #8472&nbsp;1130</span>
@@ -361,6 +357,7 @@ export function LandingPage() {
               {packs.map((p) => (
                 <article className="pack" key={p.id}>
                   <div className="pack-art">
+                    <img className="pack-image" src={p.imageUrl} alt={`${p.label} pack artwork`} />
                     <div className="veil" />
                     <div className="tier">
                       {p.tiers.map((t) => (
@@ -373,8 +370,8 @@ export function LandingPage() {
                   <div className="pack-body">
                     <div className="pack-meta">
                       <span className="pack-price">
-                        {p.pricePoints.toLocaleString()}
-                        <small> pt / pull</small>
+                        {p.priceMnt}
+                        <small> MNT / pull</small>
                       </span>
                       <span className="pack-fair">✦ provably fair</span>
                     </div>

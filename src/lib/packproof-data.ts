@@ -23,7 +23,7 @@ export const REWARD_TABLE: Reward[] = [
   { id: "reward-s", label: "Vaulted grail-card redemption NFT", rank: "S", odds: "1.0%", estimatedValue: "$420 - $580", imageUrl: ART(6) },
   { id: "reward-a", label: "High-grade collector redemption NFT", rank: "A", odds: "6.0%", estimatedValue: "$80 - $160", imageUrl: ART(25) },
   { id: "reward-b", label: "Rare foil-card redemption NFT", rank: "B", odds: "23.0%", estimatedValue: "$20 - $60", imageUrl: ART(150) },
-  { id: "reward-c", label: "Collector points reward", rank: "C", odds: "70.0%", estimatedValue: "$3 - $12", imageUrl: ART(151) },
+  { id: "reward-c", label: "Starter collector reward NFT", rank: "C", odds: "70.0%", estimatedValue: "$3 - $12", imageUrl: ART(151) },
 ];
 
 const ODDS = REWARD_TABLE.map((r) => ({
@@ -35,15 +35,15 @@ const ODDS = REWARD_TABLE.map((r) => ({
 }));
 
 // --- Provably-fair packs (matches the design's pack picker) ----------------
-// pricePoints is the no-wallet currency; priceMnt is kept for the on-chain
-// purchase path. Each pack carries its own commitment so verifyReveal differs.
+// priceMnt is the on-chain purchase value. Each pack carries its own commitment
+// so verifyReveal differs.
 export const PACKS: PackView[] = [
   {
     id: "psa10",
     name: "PSA 10 Box",
     label: "PSA 10 Box",
+    imageUrl: "/pack-psa10.webp",
     tiers: ["10", "9"],
-    pricePoints: 1200,
     priceMnt: "12",
     topRate: "PSA 10 rate 4.2%",
     fillPercent: 22,
@@ -59,8 +59,8 @@ export const PACKS: PackView[] = [
     id: "vint",
     name: "Vintage Select",
     label: "Vintage Select",
+    imageUrl: "/kairiki-charizard.avif",
     tiers: ["10", "8"],
-    pricePoints: 3500,
     priceMnt: "35",
     topRate: "High-tier 11.0%",
     fillPercent: 48,
@@ -76,8 +76,8 @@ export const PACKS: PackView[] = [
     id: "daily",
     name: "Daily Roll",
     label: "Daily Roll",
+    imageUrl: "/pack-daily-roll.jpg",
     tiers: ["9", "7"],
-    pricePoints: 480,
     priceMnt: "5",
     topRate: "PSA 9+ rate 28%",
     fillPercent: 34,

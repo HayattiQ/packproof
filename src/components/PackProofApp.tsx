@@ -24,12 +24,11 @@ function readHash(): Tab {
 
 /**
  * PackProof app shell — obsidian + grade-gold + holo design. Sticky nav with
- * deep-linkable tabs, a collector-points balance, and the no-wallet chip. Each
- * tab reads/writes the live API; signing is sponsored by the relayer.
+ * deep-linkable tabs and the no-wallet chip. Each tab reads/writes the live
+ * API; signing is sponsored by the relayer.
  */
 export function PackProofApp() {
   const [tab, setTab] = useState<Tab>("register");
-  const [points, setPoints] = useState(5000);
 
   // Sync the active tab with the URL hash so tabs are deep-linkable.
   useEffect(() => {
@@ -43,8 +42,6 @@ export function PackProofApp() {
     if (typeof window !== "undefined") window.location.hash = k;
     setTab(k);
   }, []);
-
-  const spend = useCallback((n: number) => setPoints((p) => Math.max(0, p - n)), []);
 
   return (
     <div className="app">
@@ -66,9 +63,6 @@ export function PackProofApp() {
             ))}
           </nav>
           <div className="right">
-            <span className="pts">
-              {points.toLocaleString()} <small>pt</small>
-            </span>
             <span className="chip">
               <span className="dot" />
               Sponsored signing · no wallet
@@ -80,7 +74,7 @@ export function PackProofApp() {
       <main className="screen">
         {tab === "register" && <RegisterCard />}
         {tab === "marketplace" && <Marketplace />}
-        {tab === "open" && <PackOpen points={points} onSpend={spend} />}
+        {tab === "open" && <PackOpen />}
         {tab === "verify" && <VerifyPanel />}
       </main>
     </div>
