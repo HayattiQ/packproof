@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import type { RegisterResponse, SlabImage } from "@/lib/http/responses";
 import { GradeSeal, MANTLESCAN, shortHex, gradeLabel } from "@/components/packproof-ui";
+import { REGISTER_DEMO_ASSETS, type RegisterDemoAsset } from "@/lib/register-demo-assets";
 
 /**
  * Register a card — photo-first → AI report stepper → mint.
@@ -126,6 +127,15 @@ export function RegisterCard() {
     else setBack(slab);
   }
 
+  function loadDemoAsset(asset: RegisterDemoAsset) {
+    setFront({ side: "front", data: asset.imageUrl, mime: "image/jpeg" });
+    setBack(null);
+    setCert(asset.certNumber);
+    setError(null);
+    if (frontInput.current) frontInput.current.value = "";
+    if (backInput.current) backInput.current.value = "";
+  }
+
   const stepIcon = (st: StepState, n: number) => {
     if (st === 1) return <span className="spin" />;
     if (st === 2) return "✓";
@@ -134,6 +144,8 @@ export function RegisterCard() {
   };
 
   const isReview = result?.verdict === "manual_review";
+  const isSimulatedMint = Boolean(result?.mint?.simulated);
+  const mintTxUrl = result?.mint?.txHash && !isSimulatedMint ? `${MANTLESCAN}/tx/${result.mint.txHash}` : null;
 
   return (
     <div className="wrap narrow">
@@ -221,6 +233,48 @@ export function RegisterCard() {
             <p className="field-hint">Tip: enter a cert containing “FAKE” to see the registry-mismatch branch.</p>
           </div>
 
+          <div className="panel">
+            <div className="demo-assets-head">
+              <div>
+                <span className="field-label">Hackathon PSA assets</span>
+                <p className="field-hint" style={{ marginTop: 0 }}>
+                  Real PSA slab photos wired to resolving PSA mock records and verified for judge demos.
+                </p>
+              </div>
+              <span className="chip chip-verified">E2E PASS</span>
+            </div>
+            <div className="demo-assets">
+              {REGISTER_DEMO_ASSETS.map((asset) => {
+                const active = cert === asset.certNumber && front?.data === asset.imageUrl;
+                return (
+                  <article className={"demo-asset" + (active ? " active" : "")} key={asset.id}>
+                    <div className="demo-thumb">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={asset.imageUrl} alt={`${asset.cardLabel} demo slab`} />
+                    </div>
+                    <div className="demo-asset-body">
+                      <div className="demo-title">{asset.cardLabel}</div>
+                      <div className="demo-meta">
+                        {asset.setName} · CERT {asset.certNumber}
+                      </div>
+                      <div className="demo-actions">
+                        <GradeSeal g={asset.grade} sub={asset.gradeLabel} size="sm" />
+                        <button
+                          className="btn btn-ghost"
+                          data-testid={`register-sample-${asset.id}`}
+                          style={{ padding: "8px 11px", fontSize: 12 }}
+                          onClick={() => loadDemoAsset(asset)}
+                        >
+                          {active ? "Loaded" : "Use asset"}
+                        </button>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+
           <div className="panel" style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
             <div
               style={{
@@ -253,6 +307,7 @@ export function RegisterCard() {
 
           <button
             className="btn btn-primary"
+            data-testid="register-submit"
             style={{
               width: "100%",
               justifyContent: "center",
@@ -322,7 +377,7 @@ export function RegisterCard() {
             <h1>Minted ✓</h1>
             <p>The relayer minted your external card NFT and recorded all four agent attestations on-chain.</p>
           </div>
-          <div className="panel">
+          <div className="panel" data-testid="register-result-minted">
             <div className="mint-result">
               <div className="mint-card">
                 <div className="win">
@@ -364,12 +419,24 @@ export function RegisterCard() {
                 </div>
                 <div className="receipt">
                   <div className="rt">✓ Sponsored mint confirmed {result.mint?.simulated ? "(simulated)" : ""}</div>
+                  {result.psaCertUrl && (
+                    <div className="rx">
+                      PSA cert{" "}
+                      <a className="ext" href={result.psaCertUrl} target="_blank" rel="noopener">
+                        {result.certNumber} ↗
+                      </a>
+                    </div>
+                  )}
                   <div className="rx">reportHash {shortHex(result.reportHash)}</div>
                   <div className="rx">
                     tx {shortHex(result.mint?.txHash)}{" "}
-                    <a className="ext" href={`${MANTLESCAN}/tx/${result.mint?.txHash ?? ""}`} target="_blank" rel="noopener">
-                      ↗
-                    </a>
+                    {mintTxUrl ? (
+                      <a className="ext" href={mintTxUrl} target="_blank" rel="noopener">
+                        ↗
+                      </a>
+                    ) : (
+                      <span>simulated</span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -378,9 +445,32 @@ export function RegisterCard() {
               <button className="btn btn-primary" onClick={reset}>
                 Register another
               </button>
-              <a className="btn btn-ghost" href={MANTLESCAN} target="_blank" rel="noopener">
-                View on explorer ↗
-              </a>
+              {mintTxUrl ? (
+                <a
+                  className="btn btn-ghost"
+                  data-testid="minted-explorer-link"
+                  href={mintTxUrl}
+                  target="_blank"
+                  rel="noopener"
+                >
+                  View on explorer ↗
+                </a>
+              ) : (
+                <span className="btn btn-ghost" data-testid="minted-explorer-link" aria-disabled="true">
+                  Simulated tx
+                </span>
+              )}
+              {result.psaCertUrl && (
+                <a
+                  className="btn btn-ghost"
+                  data-testid="minted-psa-link"
+                  href={result.psaCertUrl}
+                  target="_blank"
+                  rel="noopener"
+                >
+                  Open PSA cert ↗
+                </a>
+              )}
             </div>
             <p style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 14 }}>
               Want it tradable? Ship the slab to the vault to upgrade this token to{" "}

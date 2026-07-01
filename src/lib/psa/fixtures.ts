@@ -9,6 +9,42 @@ import type { PsaCertRecord } from "@/lib/psa/types";
  * claims no affiliation with or endorsement by PSA.
  */
 export const PSA_FIXTURES: Record<string, PsaCertRecord> = {
+  "66981342": {
+    certNumber: "66981342",
+    cardLabel: "2022 Pokemon GO Japanese #011 Radiant Charizard",
+    grade: 10,
+    gradeLabel: "GEM MT",
+    brand: "Pokemon GO Japanese",
+    year: 2022,
+    referenceImageUrls: ["/demo-register-assets/psa-radiant-charizard-real.jpg"],
+  },
+  "88325052": {
+    certNumber: "88325052",
+    cardLabel: "2021 Pokemon Classic Collection Japanese #003 Blastoise",
+    grade: 10,
+    gradeLabel: "GEM MT",
+    brand: "Pokemon Classic Collection Japanese",
+    year: 2021,
+    referenceImageUrls: ["/demo-register-assets/psa-blastoise-classic-real.jpg"],
+  },
+  "72348032": {
+    certNumber: "72348032",
+    cardLabel: "2021 Pokemon Japanese #022 Mewtwo EX 25th Anniversary",
+    grade: 10,
+    gradeLabel: "GEM MT",
+    brand: "Pokemon 25th Anniversary Japanese",
+    year: 2021,
+    referenceImageUrls: ["/demo-register-assets/psa-mewtwo-ex-real.jpg"],
+  },
+  "131778560": {
+    certNumber: "131778560",
+    cardLabel: "2021 Pokemon SWSH Fusion Strike #157 Gengar VMAX",
+    grade: 10,
+    gradeLabel: "GEM MT",
+    brand: "Pokemon Fusion Strike",
+    year: 2021,
+    referenceImageUrls: ["/demo-register-assets/psa-gengar-vmax-real.jpg"],
+  },
   "20003195": {
     certNumber: "20003195",
     cardLabel: "2003 SP Authentic #195 LeBron James RC",

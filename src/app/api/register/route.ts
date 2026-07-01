@@ -5,10 +5,12 @@ import { runPricing } from "@/lib/agents/pricing";
 import { runCompliance } from "@/lib/agents/compliance";
 import { getOcrAdapter, getImageMatchAdapter, getValuationAdapter } from "@/lib/ai";
 import { getPsaAdapter } from "@/lib/psa";
+import { psaCertUrl } from "@/lib/psa/cert-url";
 import { reportHash, jsonHash } from "@/lib/agents/report";
 import type { AuthenticationReport } from "@/lib/agents/types";
 import { recordAgentLog, mintExternalCard } from "@/lib/chain/relayer";
-import { addListing, cardArtForLabel } from "@/lib/packproof-data";
+import { addListing } from "@/lib/packproof-data";
+import { mintedImageUrlForRegistration } from "@/lib/register-mint-image";
 
 export const runtime = "nodejs";
 
@@ -41,7 +43,7 @@ export async function POST(req: Request) {
 
   const cardLabel = auth.psaRecord?.cardLabel ?? auth.ocr.cardLabel;
   const grade = auth.psaRecord?.grade ?? auth.ocr.grade;
-  const imageUrl = cardArtForLabel(cardLabel);
+  const imageUrl = mintedImageUrlForRegistration({ cardLabel, images, psaRecord: auth.psaRecord });
 
   // 2) Pricing agent (only meaningful with an identity; still returns a range).
   const pricing = await runPricing({
@@ -173,6 +175,7 @@ export async function POST(req: Request) {
     verdict,
     message,
     certNumber: auth.certNumber,
+    psaCertUrl: psaCertUrl(auth.certNumber),
     cardLabel,
     imageUrl,
     grade,
