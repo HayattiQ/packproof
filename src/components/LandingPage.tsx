@@ -49,6 +49,7 @@ export function LandingPage() {
   // hero pack-open demo
   const [phase, setPhase] = useState<OpenPhase>("sealed");
   const [rows, setRows] = useState<Row[]>(PENDING_ROWS);
+  const [heroReveal, setHeroReveal] = useState<OpenPackResponse | null>(null);
   const [verified, setVerified] = useState(false);
   const burstRef = useRef<HTMLDivElement>(null);
   const slabRef = useRef<HTMLDivElement>(null);
@@ -141,6 +142,7 @@ export function LandingPage() {
       return;
     }
     await sleep(520);
+    setHeroReveal(json);
     setPhase("revealed");
     setTimeout(() => spawnSparks(burstRef.current), 60);
     runVerify(json);
@@ -166,6 +168,7 @@ export function LandingPage() {
   function resetOpen() {
     setPhase("sealed");
     setRows(PENDING_ROWS);
+    setHeroReveal(null);
     setVerified(false);
   }
 
@@ -423,14 +426,24 @@ export function LandingPage() {
                         }}
                       >
                         <span>PACK REWARD</span>
-                        <GradeSeal g="10" sub="GEM" size="sm" />
+                        <GradeSeal g={heroReveal?.item.grade ?? "10"} sub={heroReveal?.item.gradeLabel ?? "GEM"} size="sm" />
                       </div>
                       <div className="win-window">
+                        {heroReveal?.imageUrl && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={heroReveal.imageUrl} alt={`${heroReveal.item.cardLabel} reward card`} />
+                        )}
                         <div className="shine" />
                       </div>
+                      <div className="reveal-meta">
+                        <div className="reveal-title">{heroReveal?.item.cardLabel ?? "Mystery card"}</div>
+                        <div className="reveal-sub">
+                          {heroReveal?.item.setName ?? "Pokemon TCG"} · CERT {heroReveal?.item.cert ?? "—"}
+                        </div>
+                      </div>
                       <div className="win-foot">
-                        <span>RANK {rows[2]?.v ?? "—"} · TOP TIER</span>
-                        <span style={{ color: "var(--jade)" }}>✓ revealed</span>
+                        <span>RANK {heroReveal?.rank ?? rows[2]?.v ?? "—"} · {heroReveal?.estimatedValue ?? "TOP TIER"}</span>
+                        <span style={{ color: "var(--jade)" }}>✓ got it</span>
                       </div>
                       <button
                         className="btn btn-ghost"

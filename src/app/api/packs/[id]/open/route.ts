@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { keccak256, toBytes } from "viem";
 import { openPackRequestSchema, type OpenPackResponse } from "@/lib/http/responses";
-import { getPack, REWARD_TABLE, recordReveal } from "@/lib/packproof-data";
+import { getPack, pickDemoPackItem, recordReveal } from "@/lib/packproof-data";
 import { purchasePack, revealPack, deriveSeedPair } from "@/lib/chain/relayer";
 
 export const runtime = "nodejs";
@@ -56,9 +56,10 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
   const reveal = await revealPack(BigInt(packTokenId), serverSeed, saltHex);
 
   // Deterministic rank from the committed seed + salt (mirrors on-chain recompute).
-  const roll = Number(BigInt(keccak256(toBytes(`${serverSeed}:${userSalt}:${packTokenId}`))) % 10000n);
+  const rollHash = keccak256(toBytes(`${serverSeed}:${userSalt}:${packTokenId}`));
+  const roll = Number(BigInt(rollHash) % 10000n);
   const rank = roll < 100 ? "S" : roll < 700 ? "A" : roll < 3000 ? "B" : "C";
-  const reward = REWARD_TABLE.find((r) => r.rank === rank) ?? REWARD_TABLE[REWARD_TABLE.length - 1];
+  const item = pickDemoPackItem(rollHash);
   recordReveal(rank);
 
   // verifyReveal() recompute: storedRank is committed; recomputedRank is derived
@@ -71,9 +72,10 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
     ok: true,
     packId: id,
     rank,
-    rewardLabel: reward.label,
-    estimatedValue: reward.estimatedValue,
-    imageUrl: reward.imageUrl,
+    rewardLabel: item.cardLabel,
+    estimatedValue: item.estimatedValue,
+    imageUrl: item.imageUrl,
+    item,
     rewardTokenId: reveal.returnValue ?? "0",
     purchase,
     reveal: { txHash: reveal.txHash, simulated: reveal.simulated },
