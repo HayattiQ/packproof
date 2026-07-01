@@ -15,6 +15,7 @@ import { GradeSeal, shortHex } from "@/components/packproof-ui";
 
 type Phase = "pick" | "sealed" | "opening" | "revealed";
 type Row = { k: string; v: string; cls: "" | "ok" | "bad"; show: boolean };
+type OpenPackResult = OpenPackResponse | { ok: false; error: string };
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -25,6 +26,23 @@ const PENDING_ROWS: Array<{ k: string; v: string }> = [
   { k: "recomputed", v: "—" },
   { k: "tx", v: "—" },
 ];
+
+async function readOpenPackResult(res: Response): Promise<OpenPackResult> {
+  const contentType = res.headers.get("content-type") ?? "";
+  if (contentType.includes("application/json")) {
+    return (await res.json()) as OpenPackResult;
+  }
+  const body = await res.text();
+  const preview = body
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 120);
+  return {
+    ok: false,
+    error: `Open failed (${res.status}). ${preview || "Server returned a non-JSON response."}`,
+  };
+}
 
 export function PackOpen() {
   const [packs, setPacks] = useState<PackView[]>([]);
@@ -65,14 +83,14 @@ export function PackOpen() {
     if (!picked) return;
     setPhase("opening");
 
-    let json: OpenPackResponse | { ok: false; error: string };
+    let json: OpenPackResult;
     try {
       const res = await fetch(`/api/packs/${picked.id}/open`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ userSalt: `salt-${Math.random().toString(36).slice(2)}` }),
       });
-      json = (await res.json()) as OpenPackResponse | { ok: false; error: string };
+      json = await readOpenPackResult(res);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Open failed.");
       setPhase("sealed");
@@ -198,18 +216,24 @@ export function PackOpen() {
                       }}
                     >
                       <span>PACK REWARD</span>
-                      <GradeSeal g={topTier} sub="GEM" size="sm" />
+                      <GradeSeal g={reveal?.item.grade ?? topTier} sub={reveal?.item.gradeLabel ?? "GEM"} size="sm" />
                     </div>
                     <div className="win-window">
                       {reveal?.imageUrl && (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={reveal.imageUrl} alt={`${reveal.rewardLabel} reward card`} />
+                        <img src={reveal.imageUrl} alt={`${reveal.item.cardLabel} reward card`} />
                       )}
                       <div className="shine" />
                     </div>
+                    <div className="reveal-meta">
+                      <div className="reveal-title">{reveal?.item.cardLabel ?? reveal?.rewardLabel ?? "Mystery card"}</div>
+                      <div className="reveal-sub">
+                        {reveal?.item.setName ?? "Pokemon TCG"} · CERT {reveal?.item.cert ?? "—"}
+                      </div>
+                    </div>
                     <div className="win-foot">
-                      <span>RANK {reveal?.rank ?? "—"} · {reveal?.rewardLabel ?? "TOP TIER"}</span>
-                      <span style={{ color: "var(--jade)" }}>✓ revealed</span>
+                      <span>RANK {reveal?.rank ?? "—"} · {reveal?.estimatedValue ?? "TOP TIER"}</span>
+                      <span style={{ color: "var(--jade)" }}>✓ got it</span>
                     </div>
                     <button
                       className="btn btn-ghost"

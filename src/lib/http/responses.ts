@@ -149,6 +149,16 @@ export type OpenPackResponse = {
   rewardLabel: string;
   estimatedValue: string;
   imageUrl: string;
+  item: {
+    id: string;
+    cardLabel: string;
+    setName: string;
+    grade: number;
+    gradeLabel: string;
+    cert: string;
+    estimatedValue: string;
+    imageUrl: string;
+  };
   rewardTokenId: string;
   purchase: { txHash: string; simulated: boolean } | null;
   reveal: { txHash: string; simulated: boolean };

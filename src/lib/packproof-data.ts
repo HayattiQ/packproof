@@ -19,6 +19,125 @@ export type Reward = {
   imageUrl: string;
 };
 
+export type DemoPackItem = {
+  id: string;
+  cardLabel: string;
+  setName: string;
+  grade: 10;
+  gradeLabel: "GEM MT";
+  cert: string;
+  estimatedValue: string;
+  imageUrl: string;
+};
+
+export const DEMO_PACK_ITEMS: DemoPackItem[] = [
+  {
+    id: "base-charizard",
+    cardLabel: "Charizard · Base Set Holo",
+    setName: "Base Set",
+    grade: 10,
+    gradeLabel: "GEM MT",
+    cert: "2520 1068",
+    estimatedValue: "$8,500 - $12,000",
+    imageUrl: "https://images.pokemontcg.io/base1/4_hires.png",
+  },
+  {
+    id: "neo-shining-charizard",
+    cardLabel: "Shining Charizard",
+    setName: "Neo Destiny",
+    grade: 10,
+    gradeLabel: "GEM MT",
+    cert: "4417 9302",
+    estimatedValue: "$4,200 - $7,800",
+    imageUrl: "https://images.pokemontcg.io/neo4/107_hires.png",
+  },
+  {
+    id: "moonbreon",
+    cardLabel: "Umbreon VMAX · Moonbreon",
+    setName: "Evolving Skies",
+    grade: 10,
+    gradeLabel: "GEM MT",
+    cert: "7110 0215",
+    estimatedValue: "$1,500 - $2,800",
+    imageUrl: "https://images.pokemontcg.io/swsh7/215_hires.png",
+  },
+  {
+    id: "rayquaza-vmax",
+    cardLabel: "Rayquaza VMAX",
+    setName: "Evolving Skies",
+    grade: 10,
+    gradeLabel: "GEM MT",
+    cert: "8369 5818",
+    estimatedValue: "$850 - $1,600",
+    imageUrl: "https://images.pokemontcg.io/swsh7/218_hires.png",
+  },
+  {
+    id: "giratina-v",
+    cardLabel: "Giratina V",
+    setName: "Lost Origin",
+    grade: 10,
+    gradeLabel: "GEM MT",
+    cert: "6186 0186",
+    estimatedValue: "$700 - $1,250",
+    imageUrl: "https://images.pokemontcg.io/swsh11/186_hires.png",
+  },
+  {
+    id: "lugia-v",
+    cardLabel: "Lugia V",
+    setName: "Silver Tempest",
+    grade: 10,
+    gradeLabel: "GEM MT",
+    cert: "6220 0186",
+    estimatedValue: "$420 - $900",
+    imageUrl: "https://images.pokemontcg.io/swsh12/186_hires.png",
+  },
+  {
+    id: "pikachu-vmax-rainbow",
+    cardLabel: "Pikachu VMAX · Rainbow",
+    setName: "Vivid Voltage",
+    grade: 10,
+    gradeLabel: "GEM MT",
+    cert: "6041 0188",
+    estimatedValue: "$360 - $780",
+    imageUrl: "https://images.pokemontcg.io/swsh4/188_hires.png",
+  },
+  {
+    id: "gengar-vmax",
+    cardLabel: "Gengar VMAX",
+    setName: "Fusion Strike",
+    grade: 10,
+    gradeLabel: "GEM MT",
+    cert: "9550 0271",
+    estimatedValue: "$500 - $1,050",
+    imageUrl: "https://images.pokemontcg.io/swsh8/271_hires.png",
+  },
+  {
+    id: "espeon-vmax",
+    cardLabel: "Espeon VMAX",
+    setName: "Fusion Strike",
+    grade: 10,
+    gradeLabel: "GEM MT",
+    cert: "8711 0270",
+    estimatedValue: "$280 - $650",
+    imageUrl: "https://images.pokemontcg.io/swsh8/270_hires.png",
+  },
+  {
+    id: "mewtwo-gx-secret",
+    cardLabel: "Mewtwo-GX · Secret Rare",
+    setName: "Shining Legends",
+    grade: 10,
+    gradeLabel: "GEM MT",
+    cert: "9120 0078",
+    estimatedValue: "$250 - $600",
+    imageUrl: "https://images.pokemontcg.io/sm35/78_hires.png",
+  },
+];
+
+export function pickDemoPackItem(seed: string): DemoPackItem {
+  const index = Number(BigInt(seed) % BigInt(DEMO_PACK_ITEMS.length));
+  return DEMO_PACK_ITEMS[index];
+}
+
 export const REWARD_TABLE: Reward[] = [
   { id: "reward-s", label: "Vaulted grail-card redemption NFT", rank: "S", odds: "1.0%", estimatedValue: "$420 - $580", imageUrl: ART(6) },
   { id: "reward-a", label: "High-grade collector redemption NFT", rank: "A", odds: "6.0%", estimatedValue: "$80 - $160", imageUrl: ART(25) },
