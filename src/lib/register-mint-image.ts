@@ -1,6 +1,7 @@
 import type { SlabImage } from "@/lib/http/responses";
 import { cardArtForLabel } from "@/lib/packproof-data";
 import type { PsaCertRecord } from "@/lib/psa/types";
+import { REGISTER_DEMO_ASSETS } from "@/lib/register-demo-assets";
 
 export function mintedImageUrlForRegistration({
   cardLabel,
@@ -11,6 +12,11 @@ export function mintedImageUrlForRegistration({
   images: SlabImage[];
   psaRecord: PsaCertRecord | null | undefined;
 }): string {
+  const demoCardImage = REGISTER_DEMO_ASSETS.find(
+    (asset) => asset.certNumber === psaRecord?.certNumber,
+  )?.cardImageUrl;
+  if (isDisplayableAssetUrl(demoCardImage)) return demoCardImage;
+
   const registryImage = psaRecord?.referenceImageUrls.find(isDisplayableAssetUrl);
   if (registryImage) return registryImage;
 
