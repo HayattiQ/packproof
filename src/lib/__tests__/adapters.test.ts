@@ -4,6 +4,7 @@ import { MockImageMatchAdapter } from "@/lib/ai/imagematch/mock";
 import { MockValuationAdapter } from "@/lib/ai/valuation/mock";
 import { CompsValuationAdapter } from "@/lib/ai/valuation/comps";
 import { MockPsaAdapter } from "@/lib/psa/mock";
+import { REGISTER_DEMO_ASSETS } from "@/lib/register-demo-assets";
 import type { SlabImage } from "@/lib/ai/types";
 
 const images: SlabImage[] = [{ side: "front", data: "AAAABBBBCCCC" }];
@@ -37,6 +38,20 @@ describe("mock adapters are deterministic", () => {
     const r = await a.estimate({ cardLabel: "1986 Fleer #57 Michael Jordan RC", grade: 10 });
     expect(r.compCount).toBeGreaterThan(0);
     expect(r.source).toBe("valuation:comps");
+  });
+
+  it("uses cert-specific comps for register demo assets", async () => {
+    const a = new CompsValuationAdapter();
+    for (const asset of REGISTER_DEMO_ASSETS) {
+      const r = await a.estimate({
+        certNumber: asset.certNumber,
+        cardLabel: asset.cardLabel,
+        grade: asset.grade,
+      });
+      expect(r.compCount, asset.id).toBeGreaterThan(0);
+      expect(r.source, asset.id).toBe("valuation:comps");
+      expect(r.highUsd, asset.id).toBeLessThan(300);
+    }
   });
 
   it("PSA mock resolves fixtures and rejects the all-zeros pattern", async () => {

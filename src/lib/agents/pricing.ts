@@ -8,6 +8,7 @@ import { getValuationAdapter } from "@/lib/ai";
  * a guaranteed price (accuracy guardrail). Score reflects valuation confidence.
  */
 export async function runPricing(query: {
+  certNumber?: string;
   cardLabel: string;
   grade: number;
 }): Promise<PricingResult> {

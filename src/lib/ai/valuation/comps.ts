@@ -2,7 +2,7 @@ import type { ValuationAdapter, ValuationQuery, ValuationResult } from "@/lib/ai
 import { MockValuationAdapter } from "@/lib/ai/valuation/mock";
 import compsTable from "@/lib/ai/valuation/comps-table.json";
 
-type CompRow = { cardLabel: string; grade: number; salesUsd: number[] };
+type CompRow = { certNumber?: string; cardLabel: string; grade: number; salesUsd: number[] };
 type CompsTable = { comps: CompRow[]; defaultBaselineUsd: number };
 
 const table = compsTable as CompsTable;
@@ -21,9 +21,9 @@ export class CompsValuationAdapter implements ValuationAdapter {
   private fallback = new MockValuationAdapter();
 
   async estimate(query: ValuationQuery): Promise<ValuationResult> {
-    const row = table.comps.find(
-      (c) => c.cardLabel === query.cardLabel && c.grade === query.grade,
-    );
+    const cert = query.certNumber?.replace(/\D/g, "");
+    const row = table.comps.find((c) => cert && c.certNumber === cert)
+      ?? table.comps.find((c) => c.cardLabel === query.cardLabel && c.grade === query.grade);
     if (!row || row.salesUsd.length === 0) {
       return this.fallback.estimate(query);
     }
