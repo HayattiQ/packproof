@@ -6,10 +6,12 @@ import {
   toBytes,
   toHex,
   encodePacked,
+  parseEventLogs,
   parseAbiItem,
   type Abi,
   type Address,
   type Hex,
+  type TransactionReceipt,
   type WalletClient,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
@@ -105,6 +107,7 @@ type WriteArgs = {
   value?: bigint;
   label: string;
   simulatedReturn?: string;
+  extractReturnValue?: (receipt: TransactionReceipt) => string | undefined;
 };
 
 /**
@@ -132,8 +135,14 @@ export async function relayWrite(w: WriteArgs): Promise<TxReceipt> {
       args: w.args as never,
       value: w.value,
     });
-    await getPublicClient().waitForTransactionReceipt({ hash: txHash });
-    return { txHash, simulated: false, returnValue: w.simulatedReturn };
+    const receipt = await getPublicClient().waitForTransactionReceipt({ hash: txHash });
+    let returnValue = w.simulatedReturn;
+    try {
+      returnValue = w.extractReturnValue?.(receipt) ?? w.simulatedReturn;
+    } catch (error) {
+      console.warn(`Relayer write succeeded for ${w.label}; failed to decode return value.`, error);
+    }
+    return { txHash, simulated: false, returnValue };
   } catch (error) {
     console.error(`Relayer write failed for ${w.label}; falling back to simulated receipt.`, error);
     return simulatedReceipt(w);
@@ -142,6 +151,21 @@ export async function relayWrite(w: WriteArgs): Promise<TxReceipt> {
 
 function serializeArgs(args: readonly unknown[]): unknown[] {
   return args.map((a) => (typeof a === "bigint" ? a.toString() : a));
+}
+
+function packManagerEventArg(
+  receipt: TransactionReceipt,
+  eventName: "PackPurchased" | "PackRevealed",
+  argName: string,
+): string | undefined {
+  const logs = parseEventLogs({
+    abi: packManagerAbi,
+    eventName,
+    logs: receipt.logs,
+  }) as Array<{ args?: Record<string, unknown> }>;
+  const value = logs[0]?.args?.[argName];
+  if (typeof value === "bigint") return value.toString();
+  return value == null ? undefined : String(value);
 }
 
 // --- High-level operations used by the API routes --------------------------
@@ -280,6 +304,50 @@ export function deriveSeedPair(key: string): { serverSeed: Hex; seedCommitment: 
   return { serverSeed, seedCommitment };
 }
 
+/** Read the current on-chain pack price, falling back to the display-config price offline. */
+export async function readPackPrice(packId: bigint, fallback: bigint): Promise<bigint> {
+  if (!isContractConfigured("packManager")) return fallback;
+  try {
+    const pack = (await getPublicClient().readContract({
+      address: getContractAddress("packManager"),
+      abi: packManagerAbi,
+      functionName: "packs",
+      args: [packId],
+    })) as readonly [bigint, bigint, bigint, bigint, Hex, Hex, number];
+    return pack[0] > 0n ? pack[0] : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+export type PackRevealVerification = {
+  revealed: boolean;
+  matches: boolean;
+  recomputedRank: number;
+  storedRank: number;
+};
+
+/** Read PackManager.verifyReveal for a real on-chain pack token. */
+export async function readPackRevealVerification(packTokenId: bigint): Promise<PackRevealVerification | null> {
+  if (!isContractConfigured("packManager")) return null;
+  try {
+    const result = (await getPublicClient().readContract({
+      address: getContractAddress("packManager"),
+      abi: packManagerAbi,
+      functionName: "verifyReveal",
+      args: [packTokenId],
+    })) as readonly [boolean, boolean, number, number];
+    return {
+      revealed: result[0],
+      matches: result[1],
+      recomputedRank: Number(result[2]),
+      storedRank: Number(result[3]),
+    };
+  } catch {
+    return null;
+  }
+}
+
 /** Purchase a sealed pack token (sponsored). Publishes the seed commitment. */
 export async function purchasePack(packId: bigint, price: bigint, seedCommitment: Hex): Promise<TxReceipt> {
   return relayWrite({
@@ -289,6 +357,7 @@ export async function purchasePack(packId: bigint, price: bigint, seedCommitment
     value: price,
     label: `purchasePack:${packId}`,
     simulatedReturn: deterministicId("packToken", packId),
+    extractReturnValue: (receipt) => packManagerEventArg(receipt, "PackPurchased", "packTokenId"),
   });
 }
 
@@ -300,6 +369,7 @@ export async function revealPack(packTokenId: bigint, serverSeed: Hex, userSalt:
     args: [packTokenId, serverSeed, userSalt],
     label: `revealPack:${packTokenId}`,
     simulatedReturn: deterministicId("reward", packTokenId),
+    extractReturnValue: (receipt) => packManagerEventArg(receipt, "PackRevealed", "rewardTokenId"),
   });
 }
 
