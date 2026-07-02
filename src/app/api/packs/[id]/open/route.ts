@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { keccak256, toBytes } from "viem";
 import { openPackRequestSchema, type OpenPackResponse } from "@/lib/http/responses";
 import { getPack, pickDemoPackItem, recordReveal } from "@/lib/packproof-data";
-import { purchasePack, revealPack, deriveSeedPair } from "@/lib/chain/relayer";
+import { purchasePack, revealPack, deriveSeedPair, readPackPrice, readPackRevealVerification } from "@/lib/chain/relayer";
 
 export const runtime = "nodejs";
 
@@ -46,8 +46,10 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
   const seedKey = `${id}:${userSalt}`;
   const { serverSeed, seedCommitment } = deriveSeedPair(seedKey);
   if (!packTokenId) {
-    const priceMnt = BigInt(pack.priceMnt) * 10n ** 18n;
-    const pr = await purchasePack(BigInt(numericPackId(id)), priceMnt, seedCommitment);
+    const chainPackId = BigInt(numericPackId(id));
+    const displayPrice = BigInt(pack.priceMnt) * 10n ** 18n;
+    const purchaseValue = await readPackPrice(chainPackId, displayPrice);
+    const pr = await purchasePack(chainPackId, purchaseValue, seedCommitment);
     purchase = { txHash: pr.txHash, simulated: pr.simulated };
     packTokenId = pr.returnValue ?? "0";
   }
@@ -58,15 +60,19 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
   // Deterministic rank from the committed seed + salt (mirrors on-chain recompute).
   const rollHash = keccak256(toBytes(`${serverSeed}:${userSalt}:${packTokenId}`));
   const roll = Number(BigInt(rollHash) % 10000n);
-  const rank = roll < 100 ? "S" : roll < 700 ? "A" : roll < 3000 ? "B" : "C";
+  let rank = roll < 100 ? "S" : roll < 700 ? "A" : roll < 3000 ? "B" : "C";
   const item = pickDemoPackItem(rollHash);
   recordReveal(rank);
 
   // verifyReveal() recompute: storedRank is committed; recomputedRank is derived
   // from the revealed serverSeed + the pack's inventoryRoot. In the happy path
   // they are equal (the commit-reveal integrity check passes).
-  const storedRank = (Number(BigInt(keccak256(toBytes(`${seedCommitment}:rank`))) % 4n) + 1);
-  const recomputedRank = storedRank;
+  const chainVerify = reveal.simulated ? null : await readPackRevealVerification(BigInt(packTokenId));
+  const fallbackRank = (Number(BigInt(keccak256(toBytes(`${seedCommitment}:rank`))) % 4n) + 1);
+  const storedRank = chainVerify?.storedRank ?? fallbackRank;
+  const recomputedRank = chainVerify?.recomputedRank ?? storedRank;
+  const matches = chainVerify?.matches ?? storedRank === recomputedRank;
+  if (chainVerify?.revealed) rank = rankLabel(storedRank);
 
   const response: OpenPackResponse = {
     ok: true,
@@ -85,7 +91,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
       serverSeed,
       storedRank,
       recomputedRank,
-      matches: storedRank === recomputedRank,
+      matches,
       txHash: reveal.txHash,
     },
   };
@@ -97,6 +103,19 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
  * numeric pack id for the purchasePack call. Numeric ids pass through.
  */
 function numericPackId(id: string): number {
+  const demoPackIds: Record<string, number> = {
+    // The deployed Mantle Sepolia demo contract currently has one canonical live
+    // pack. All UI pack variants settle against it so the sponsored open can
+    // produce a real explorer tx instead of a synthetic demo hash.
+    psa10: 1,
+    vint: 1,
+    daily: 1,
+  };
+  if (demoPackIds[id]) return demoPackIds[id];
   if (/^\d+$/.test(id)) return Number(id);
   return (Number(BigInt(keccak256(toBytes(`packid:${id}`))) % 1000n) + 1);
+}
+
+function rankLabel(rank: number): "S" | "A" | "B" | "C" {
+  return rank === 1 ? "S" : rank === 2 ? "A" : rank === 3 ? "B" : "C";
 }
