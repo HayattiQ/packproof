@@ -57,6 +57,8 @@ export type ValuationResult = {
 };
 
 export type ValuationQuery = {
+  /** PSA cert number, when known. Prefer this for source-specific comps. */
+  certNumber?: string;
   /** normalized card identity, e.g. "2003 SP Authentic LeBron James #195". */
   cardLabel: string;
   grade: number;

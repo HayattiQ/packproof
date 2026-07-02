@@ -47,6 +47,7 @@ export async function POST(req: Request) {
 
   // 2) Pricing agent (only meaningful with an identity; still returns a range).
   const pricing = await runPricing({
+    certNumber: auth.certNumber,
     cardLabel: cardLabel ?? "Unknown card",
     grade: grade ?? 9,
   });
