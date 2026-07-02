@@ -6,6 +6,11 @@ import type { CSSProperties, ReactNode } from "react";
 export const MANTLESCAN =
   process.env.NEXT_PUBLIC_MANTLE_EXPLORER_URL || "https://sepolia.mantlescan.xyz";
 
+export function mantleTxUrl(txHash: string | undefined | null, simulated?: boolean | null): string | null {
+  if (!txHash || simulated) return null;
+  return `${MANTLESCAN}/tx/${txHash}`;
+}
+
 /** "$1,240" */
 export function money(n: number): string {
   return "$" + n.toLocaleString();

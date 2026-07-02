@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { OpenPackResponse, PackView, PacksResponse } from "@/lib/http/responses";
-import { GradeSeal, shortHex } from "@/components/packproof-ui";
+import { GradeSeal, mantleTxUrl, shortHex } from "@/components/packproof-ui";
 
 /**
  * Open a pack — pick → sealed → reveal + on-chain verifyReveal.
@@ -154,6 +154,7 @@ export function PackOpen() {
   }
 
   const topTier = picked?.tiers[0] ?? "10";
+  const txExplorerHref = mantleTxUrl(reveal?.verify.txHash, reveal?.reveal.simulated);
 
   return (
     <div className="wrap">
@@ -290,6 +291,29 @@ export function PackOpen() {
                       </>
                     )}
                   </div>
+                  {reveal && (
+                    <div className="tx-actions">
+                      {txExplorerHref ? (
+                        <a
+                          className="btn btn-ghost mono"
+                          data-testid="open-explorer-link"
+                          href={txExplorerHref}
+                          target="_blank"
+                          rel="noopener"
+                        >
+                          View tx on explorer ↗
+                        </a>
+                      ) : (
+                        <span
+                          className="btn btn-ghost mono is-disabled"
+                          aria-disabled="true"
+                          title="Explorer links are shown only for real Mantle Sepolia transactions."
+                        >
+                          Explorer unavailable
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
                 {error && <p style={{ color: "var(--danger)", fontWeight: 700, marginTop: 12 }}>{error}</p>}
                 <p style={{ fontSize: 11.5, color: "var(--ink-faint)", marginTop: 12 }}>

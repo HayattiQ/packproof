@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { Listing, MarketplaceResponse, OpenPackResponse, PackView, PacksResponse } from "@/lib/http/responses";
-import { GradeSeal, MANTLESCAN, money, shortHex, gradeLabel } from "@/components/packproof-ui";
+import { GradeSeal, MANTLESCAN, mantleTxUrl, money, shortHex, gradeLabel } from "@/components/packproof-ui";
 
 /**
  * PackProof landing page — ported from the Claude Design handoff (PackProof.html
@@ -216,6 +216,8 @@ export function LandingPage() {
     }
     setTimeout(() => host.replaceChildren(), 1300);
   }
+
+  const heroTxExplorerHref = mantleTxUrl(heroReveal?.verify.txHash, heroReveal?.reveal.simulated);
 
   return (
     <>
@@ -523,6 +525,29 @@ export function LandingPage() {
                         </>
                       )}
                     </div>
+                    {heroReveal && (
+                      <div className="tx-actions">
+                        {heroTxExplorerHref ? (
+                          <a
+                            className="btn btn-ghost mono"
+                            data-testid="landing-open-explorer-link"
+                            href={heroTxExplorerHref}
+                            target="_blank"
+                            rel="noopener"
+                          >
+                            View tx on explorer ↗
+                          </a>
+                        ) : (
+                          <span
+                            className="btn btn-ghost mono is-disabled"
+                            aria-disabled="true"
+                            title="Explorer links are shown only for real Mantle Sepolia transactions."
+                          >
+                            Explorer unavailable
+                          </span>
+                        )}
+                      </div>
+                    )}
                     {openError && <p style={{ color: "var(--danger)", fontWeight: 700, marginTop: 12 }}>{openError}</p>}
                   </div>
                 </div>
