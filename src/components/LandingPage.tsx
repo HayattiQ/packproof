@@ -220,26 +220,30 @@ export function LandingPage() {
   return (
     <>
       {/* ======================= NAV ======================= */}
-      <header className="nav">
-        <div className="wrap nav-in">
+      <header className="appnav">
+        <div className="wrap appnav-in">
           <a className="brand" href="#top">
             <span className="mark">P</span>PackProof
           </a>
-          <nav className="nav-links">
-            <a href="#packs">Packs</a>
-            <a href="#open">Open</a>
-            <a href="#pipeline">AI Verify</a>
-            <a href="#market">Market</a>
-            <a href="#proof">On-chain</a>
+          <nav className="apptabs">
+            <Link className="apptab" href="/app#register">
+              Register a card
+            </Link>
+            <Link className="apptab" href="/app#marketplace">
+              Marketplace
+            </Link>
+            <Link className="apptab" href="/app#open">
+              Open a pack
+            </Link>
+            <Link className="apptab" href="/app#verify">
+              Verify
+            </Link>
           </nav>
-          <div className="nav-cta">
+          <div className="right">
             <span className="chip">
               <span className="dot" />
               Sponsored signing · no wallet
             </span>
-            <Link className="btn btn-primary" href="/app#register">
-              Register a card
-            </Link>
           </div>
         </div>
       </header>
