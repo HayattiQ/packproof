@@ -6,6 +6,7 @@ import {
   toBytes,
   toHex,
   encodePacked,
+  parseAbiItem,
   type Abi,
   type Address,
   type Hex,
@@ -146,6 +147,16 @@ function serializeArgs(args: readonly unknown[]): unknown[] {
 // --- High-level operations used by the API routes --------------------------
 
 const ASSET_CLASS_PSA = keccak256(toBytes("PSA_GRADED_CARD"));
+const CARD_MINTED_EVENT = parseAbiItem(
+  "event CardMinted(uint256 indexed tokenId, bytes32 indexed certHash, address indexed owner, uint8 custody, bytes32 reportHash)",
+);
+const LOG_SCAN_CHUNK = 9_000n;
+const MINT_LOOKBACK_BLOCKS = 250_000n;
+
+export type ExternalCardMint = {
+  tokenId: string;
+  txHash: Hex;
+};
 
 /** keccak256 hex of an arbitrary string (for input/identity hashes). */
 export function hashString(s: string): Hex {
@@ -186,6 +197,57 @@ export async function mintExternalCard(params: {
     label: `mintCard:${params.certNumber}`,
     simulatedReturn: (BigInt(certHash) % 100000n).toString(),
   });
+}
+
+/**
+ * Find the real on-chain mint transaction for an already-tokenized cert.
+ *
+ * Register demo certs are reused by many judges. The contract correctly rejects
+ * duplicate mints, so repeat submissions should point at the original mint tx
+ * instead of falling back to a synthetic receipt.
+ */
+export async function findExternalCardMint(certNumber: string): Promise<ExternalCardMint | null> {
+  if (!isContractConfigured("externalCardNft")) return null;
+
+  const address = getContractAddress("externalCardNft");
+  const certHash = keccak256(toBytes(certNumber));
+  const client = getPublicClient();
+
+  let tokenId: bigint;
+  try {
+    tokenId = await client.readContract({
+      address,
+      abi: externalCardNftAbi,
+      functionName: "tokenIdForCert",
+      args: [certHash],
+    }) as bigint;
+  } catch {
+    return null;
+  }
+  if (tokenId === 0n) return null;
+
+  const latest = await client.getBlockNumber();
+  const floor = latest > MINT_LOOKBACK_BLOCKS ? latest - MINT_LOOKBACK_BLOCKS : 0n;
+  let toBlock = latest;
+
+  while (toBlock >= floor) {
+    const fromBlock = toBlock > floor + LOG_SCAN_CHUNK ? toBlock - LOG_SCAN_CHUNK : floor;
+    const logs = await client.getLogs({
+      address,
+      event: CARD_MINTED_EVENT,
+      args: { certHash },
+      fromBlock,
+      toBlock,
+    });
+    const log = logs.find((l) => l.args.tokenId === tokenId) ?? logs[0];
+    if (log?.transactionHash) {
+      return { tokenId: tokenId.toString(), txHash: log.transactionHash };
+    }
+    if (fromBlock === floor) break;
+    toBlock = fromBlock - 1n;
+  }
+
+  return null;
 }
 
 /** Write an AI agent attestation log (AttestationLog.recordAgentLog). */

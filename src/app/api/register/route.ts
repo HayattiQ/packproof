@@ -8,7 +8,7 @@ import { getPsaAdapter } from "@/lib/psa";
 import { psaCertUrl } from "@/lib/psa/cert-url";
 import { reportHash, jsonHash } from "@/lib/agents/report";
 import type { AuthenticationReport } from "@/lib/agents/types";
-import { recordAgentLog, mintExternalCard } from "@/lib/chain/relayer";
+import { recordAgentLog, mintExternalCard, findExternalCardMint } from "@/lib/chain/relayer";
 import { addListing } from "@/lib/packproof-data";
 import { mintedImageUrlForRegistration } from "@/lib/register-mint-image";
 
@@ -101,22 +101,32 @@ export async function POST(req: Request) {
   // Mint the external NFT only when approved (ExternalCardNFT.mintCard).
   let mint: RegisterResponse["mint"] = null;
   if (verdict === "approved") {
-    const mintReceipt = await mintExternalCard({
-      certNumber: auth.certNumber,
-      cardIdentity: cardLabel ?? auth.certNumber,
-      grade: grade ?? 0,
-      reportHash: hash,
-      valuationLowUsd: pricing.lowUsd,
-      valuationHighUsd: pricing.highUsd,
-      custodyTier,
-    });
-    {
-      const tokenId = mintReceipt.returnValue ?? "0";
-      mint = { txHash: mintReceipt.txHash, simulated: mintReceipt.simulated, tokenId };
+    const existingMint = await findExternalCardMint(auth.certNumber);
+    if (existingMint) {
+      mint = { txHash: existingMint.txHash, simulated: false, tokenId: existingMint.tokenId };
+    } else {
+      const mintReceipt = await mintExternalCard({
+        certNumber: auth.certNumber,
+        cardIdentity: cardLabel ?? auth.certNumber,
+        grade: grade ?? 0,
+        reportHash: hash,
+        valuationLowUsd: pricing.lowUsd,
+        valuationHighUsd: pricing.highUsd,
+        custodyTier,
+      });
+      const onChainMint = mintReceipt.simulated ? await findExternalCardMint(auth.certNumber) : null;
+      const tokenId = onChainMint?.tokenId ?? mintReceipt.returnValue ?? "0";
+      mint = {
+        txHash: onChainMint?.txHash ?? mintReceipt.txHash,
+        simulated: onChainMint ? false : mintReceipt.simulated,
+        tokenId,
+      };
+    }
+    if (mint) {
       // Custodial tokens become listable inventory.
       if (custodyTier === "custodial" && cardLabel) {
         addListing({
-          tokenId,
+          tokenId: mint.tokenId,
           cardLabel,
           grade: grade ?? 0,
           priceMnt: estimateToMnt(pricing.estimateUsd),
