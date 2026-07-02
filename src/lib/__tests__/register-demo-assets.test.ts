@@ -13,6 +13,7 @@ describe("register demo assets", () => {
       expect(asset.grade).toBe(10);
       expect(asset.gradeLabel).toBe("GEM MT");
       expect(asset.imageUrl).toMatch(/^\/demo-register-assets\/psa-.+-real\.jpg$/);
+      expect(asset.cardImageUrl).toMatch(/^https:\/\/images\.pokemontcg\.io\/.+_hires\.png$/);
       expect(asset.sourceUrl).toMatch(/^https:\/\//);
       expect(psaCertUrl(asset.certNumber)).toBe(`https://www.psacard.com/cert/${asset.certNumber}`);
       expect(PSA_FIXTURES[asset.certNumber]?.cardLabel).toBe(asset.cardLabel);
@@ -22,7 +23,7 @@ describe("register demo assets", () => {
           images: [{ side: "front", data: asset.imageUrl, mime: "image/jpeg" }],
           psaRecord: PSA_FIXTURES[asset.certNumber],
         }),
-      ).toBe(asset.imageUrl);
+      ).toBe(asset.cardImageUrl);
     }
   });
 
