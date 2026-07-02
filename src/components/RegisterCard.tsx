@@ -19,7 +19,7 @@ const REG_STAGES = [
   { agent: "AUTHENTICATION AGENT", t: "Label OCR", s: "Reading cert, grade & name from the slab photos", stat: "0.98 conf." },
   { agent: "AUTHENTICATION AGENT", t: "PSA registry match", s: "Reconciling the cert against the PSA public registry", stat: "MATCH" },
   { agent: "COMPLIANCE AGENT", t: "Counterfeit / altered-slab check", s: "Image-matching the slab for tampering", stat: "PASS" },
-  { agent: "PRICING AGENT", t: "Value-range estimate", s: "Deriving a price range from comparable sales", stat: "$1.1k–1.4k" },
+  { agent: "PRICING AGENT", t: "Value-range estimate", s: "Deriving a price range from comparable sales", stat: "COMPS" },
 ];
 
 type Phase = "form" | "running" | "done" | "failed";
