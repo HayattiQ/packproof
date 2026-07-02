@@ -33,6 +33,7 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 type OpenPhase = "sealed" | "opening" | "revealed";
 type Row = { k: string; v: string; cls: "" | "ok" | "bad"; show: boolean };
+type OpenPackResult = OpenPackResponse | { ok: false; error: string };
 
 const PENDING_ROWS: Row[] = [
   { k: "commitment", v: "0x9f3c…a1b8", cls: "", show: true },
@@ -41,6 +42,23 @@ const PENDING_ROWS: Row[] = [
   { k: "recomputed", v: "—", cls: "", show: true },
   { k: "tx", v: "—", cls: "", show: true },
 ];
+
+async function readOpenPackResult(res: Response): Promise<OpenPackResult> {
+  const contentType = res.headers.get("content-type") ?? "";
+  if (contentType.includes("application/json")) {
+    return (await res.json()) as OpenPackResult;
+  }
+  const body = await res.text();
+  const preview = body
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 120);
+  return {
+    ok: false,
+    error: `Open failed (${res.status}). ${preview || "Server returned a non-JSON response."}`,
+  };
+}
 
 export function LandingPage() {
   const [packs, setPacks] = useState<PackView[]>([]);
@@ -51,6 +69,7 @@ export function LandingPage() {
   const [rows, setRows] = useState<Row[]>(PENDING_ROWS);
   const [heroReveal, setHeroReveal] = useState<OpenPackResponse | null>(null);
   const [verified, setVerified] = useState(false);
+  const [openError, setOpenError] = useState<string | null>(null);
   const burstRef = useRef<HTMLDivElement>(null);
   const slabRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
@@ -125,19 +144,22 @@ export function LandingPage() {
 
   async function openPack() {
     setPhase("opening");
-    let json: OpenPackResponse | { ok: false; error: string };
+    setOpenError(null);
+    let json: OpenPackResult;
     try {
       const res = await fetch("/api/packs/psa10/open", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ userSalt: `lp-${Math.random().toString(36).slice(2)}` }),
       });
-      json = (await res.json()) as OpenPackResponse | { ok: false; error: string };
-    } catch {
+      json = await readOpenPackResult(res);
+    } catch (error) {
+      setOpenError(error instanceof Error ? error.message : "Open failed.");
       setPhase("sealed");
       return;
     }
     if (!("verify" in json)) {
+      setOpenError(json.error);
       setPhase("sealed");
       return;
     }
@@ -170,6 +192,7 @@ export function LandingPage() {
     setRows(PENDING_ROWS);
     setHeroReveal(null);
     setVerified(false);
+    setOpenError(null);
   }
 
   function spawnSparks(host: HTMLDivElement | null) {
@@ -496,6 +519,7 @@ export function LandingPage() {
                         </>
                       )}
                     </div>
+                    {openError && <p style={{ color: "var(--danger)", fontWeight: 700, marginTop: 12 }}>{openError}</p>}
                   </div>
                 </div>
               </div>

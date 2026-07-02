@@ -84,6 +84,14 @@ function simulatedTxHash(label: string, payload: unknown): Hex {
   return keccak256(toBytes(`simtx:${label}:${JSON.stringify(payload)}`));
 }
 
+function simulatedReceipt(w: WriteArgs): TxReceipt {
+  return {
+    txHash: simulatedTxHash(w.label, { fn: w.functionName, args: serializeArgs(w.args) }),
+    simulated: true,
+    returnValue: w.simulatedReturn,
+  };
+}
+
 /** keccak256 of an agent label, as written to recordAgentLog. */
 export function agentIdHash(agent: keyof typeof AGENT_IDS): Hex {
   return keccak256(toBytes(AGENT_IDS[agent]));
@@ -104,30 +112,31 @@ type WriteArgs = {
  */
 export async function relayWrite(w: WriteArgs): Promise<TxReceipt> {
   if (!realModeFor(w.contract)) {
-    return {
-      txHash: simulatedTxHash(w.label, { fn: w.functionName, args: serializeArgs(w.args) }),
-      simulated: true,
-      returnValue: w.simulatedReturn,
-    };
+    return simulatedReceipt(w);
   }
 
   const wallet = getWalletClient();
   const account = getRelayerAccount();
   if (!wallet || !account) {
-    return { txHash: simulatedTxHash(w.label, w.args), simulated: true, returnValue: w.simulatedReturn };
+    return simulatedReceipt(w);
   }
 
-  const txHash = await wallet.writeContract({
-    account,
-    chain: getMantleChain(),
-    address: getContractAddress(w.contract),
-    abi: ABIS[w.contract],
-    functionName: w.functionName as never,
-    args: w.args as never,
-    value: w.value,
-  });
-  await getPublicClient().waitForTransactionReceipt({ hash: txHash });
-  return { txHash, simulated: false, returnValue: w.simulatedReturn };
+  try {
+    const txHash = await wallet.writeContract({
+      account,
+      chain: getMantleChain(),
+      address: getContractAddress(w.contract),
+      abi: ABIS[w.contract],
+      functionName: w.functionName as never,
+      args: w.args as never,
+      value: w.value,
+    });
+    await getPublicClient().waitForTransactionReceipt({ hash: txHash });
+    return { txHash, simulated: false, returnValue: w.simulatedReturn };
+  } catch (error) {
+    console.error(`Relayer write failed for ${w.label}; falling back to simulated receipt.`, error);
+    return simulatedReceipt(w);
+  }
 }
 
 function serializeArgs(args: readonly unknown[]): unknown[] {
